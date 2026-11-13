@@ -2,12 +2,20 @@
   "name": "dsh-datapilot",
   "owner": "xiduo-wang",
   "url": "https://github.com/xiduo-wang/dsh-datapilot",
+  "page": "https://awesome-dsh-plugin.com/p/xiduo-wang/dsh-datapilot/",
   "category": "tools",
   "description": {
-    "en": "DataPilot: a persistent sidebar workbench in DeepSeek Harness for analyzing local datasets across multiple workspaces — charts, distributions, ONNX model architecture graphs, and built-in ML/DL training (linear/logistic regression, KNN, K-Means, PCA, MLP) with metrics, loss/gradient curves, confusion matrix and decision boundary.",
-    "zh": "DataPilot 数据工作台：在 DSH 侧边栏常驻一个数据分析面板，跨多工作区查看本地数据集的图表、数据分布与 ONNX 深度学习模型结构图，并内置机器学习/深度学习训练（线性回归/逻辑回归/KNN/K-Means/PCA/MLP），产出指标、损失/梯度曲线、混淆矩阵与决策边界。"
+    "en": "DataPilot: a persistent sidebar workbench in DeepSeek Harness for analyzing local datasets across multiple workspaces — charts, distributions, ONNX model architecture graphs, uploads, structured reports, and built-in ML/DL training (linear/logistic regression, KNN, K-Means, PCA, MLP) with metrics, loss/gradient curves, confusion matrix and decision boundary.",
+    "zh": "DataPilot 数据工作台：在 DSH 侧边栏常驻一个数据分析面板，跨多工作区查看本地数据集的图表、数据分布与 ONNX 深度学习模型结构图，支持上传、结构化报告，并内置机器学习/深度学习训练（线性回归/逻辑回归/KNN/K-Means/PCA/MLP），产出指标、损失/梯度曲线、混淆矩阵与决策边界。"
   },
   "npm": "dsh-datapilot",
-  "install": "dsh-datapilot",
-  "added": "2026-11-13"
+  "version": "0.1.0",
+  "install": "dsh plugin add dsh-datapilot",
+  "added": "2026-11-13",
+  "capabilities": [
+    "fs-read",
+    "fs-write"
+  ],
+  "capabilityRedLines": [],
+  "screenshots": []
 }
