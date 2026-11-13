@@ -7,8 +7,8 @@
 
 - **client 半面**（`lib/client.js`）：注册 `sidebar.panellist` 图标 + `main` 面板
   body，body 是一个 iframe，指向 host 半面服务的面板 HTML。
-- **host 半面**（`lib/host/index.js`）：20 条路由，服务面板 HTML + 数据引擎 API
-  （全部 loopback-only，见下）。
+- **host 半面**（`lib/host/index.js`）：22 条路由，服务面板 HTML + 数据引擎 API +
+  ML 训练 API（全部 loopback-only，见下）。
 - **数据引擎**（`lib/host/engine.js` + `lib/host/parsers.js`）：
   - CSV / TSV / TXT：全量解析
   - JSONL / NDJSON / JSON：JSON 支持对象数组、`{data|rows|records|items}` 包裹、列式对象、单对象
@@ -18,6 +18,9 @@
   - ONNX：内置 protobuf wire 解析模型图（节点/边/算子/参数/输入输出/opset）
 - **面板**（`assets/panel.html`）：自包含单文件（Canvas 图表 + SVG 模型图），
   通过 `/api/dsh-datapilot/*` 读取真实数据（mock 数据仅作 API 不可用时的降级）。
+- **机器学习/深度学习训练**（`lib/host/ml/`，纯 JS 零依赖，worker 线程训练）：
+  线性回归、逻辑回归、KNN、K-Means、PCA、MLP 六类模型，支持回归/分类/聚类/降维
+  四类任务，产出指标卡、loss/梯度范数曲线、混淆矩阵、散点/决策边界、MLP 数据流图。
 
 ## 数据引擎路由（host 半面，`/api/dsh-datapilot/*`）
 
@@ -28,7 +31,10 @@
 `datasets/correlation`（?id）、`datasets/groupby`（?id&by&metric&agg&topK）、
 `datasets/sample`（?id&column&n）、`datasets/close`（POST）、`models/meta`（?path）、
 `upload`（POST 原始体 + ?name，写入 `~/.dsh/dsh-datapilot/uploads`）、
-`report`（POST body `{paths}`，生成结构化 Markdown 分析报告）、`diagnostics`。
+`report`（POST body `{paths}`，生成结构化 Markdown 分析报告）、
+`ml/capabilities`（GET，模型能力清单）、
+`ml/train`（POST body `{datasetId,task,model,features,target,params,...}`，worker 线程训练）、
+`diagnostics`。
 
 统一响应 `{ok:true,...data}` / `{ok:false,error:{code,message}}`；仅接受本机回环
 请求；数据根目录用 realpath 前缀校验防目录穿越；数据集状态持久化到
@@ -65,6 +71,8 @@ dsh plugin --profile desktop add file:./dsh-datapilot
 - ✅ 多格式适配：JSON、Parquet、xlsx/`.xls` 多工作表、ONNX 结构图。
 - ✅ 解析移入 Worker 线程（多核并行，大文件不阻塞）。
 - ✅ 多看板标签页 + 图表刻度/网格/去斜体标签。
+- ✅ 内置机器学习/深度学习训练（线性回归/逻辑回归/KNN/K-Means/PCA/MLP + 指标/损失/梯度/混淆矩阵/决策边界/MLP 数据流）。
+- ⏳ 决策树 / 随机森林 / SVM（Phase 2）。
 - ⏳ Arrow/IPC、HDF5、NumPy、SPSS/Stata/SAS、SQLite。
 - ⏳ 视图书签持久化（live 模式刷新后看板清空）。
 - ⏳ ONNX 模型推理（GPU/WebGPU 加速，独立功能）。

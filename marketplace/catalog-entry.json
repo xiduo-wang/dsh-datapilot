@@ -4,8 +4,8 @@
   "url": "https://github.com/xiduo-wang/dsh-datapilot",
   "category": "tools",
   "description": {
-    "en": "DataPilot: a persistent sidebar workbench in DeepSeek Harness for analyzing local datasets across multiple workspaces — charts, distributions, and ONNX model architecture graphs.",
-    "zh": "DataPilot 数据工作台：在 DSH 侧边栏常驻一个数据分析面板，跨多工作区查看本地数据集的图表、数据分布与 ONNX 深度学习模型结构图。"
+    "en": "DataPilot: a persistent sidebar workbench in DeepSeek Harness for analyzing local datasets across multiple workspaces — charts, distributions, ONNX model architecture graphs, and built-in ML/DL training (linear/logistic regression, KNN, K-Means, PCA, MLP) with metrics, loss/gradient curves, confusion matrix and decision boundary.",
+    "zh": "DataPilot 数据工作台：在 DSH 侧边栏常驻一个数据分析面板，跨多工作区查看本地数据集的图表、数据分布与 ONNX 深度学习模型结构图，并内置机器学习/深度学习训练（线性回归/逻辑回归/KNN/K-Means/PCA/MLP），产出指标、损失/梯度曲线、混淆矩阵与决策边界。"
   },
   "npm": "dsh-datapilot",
   "install": "dsh-datapilot",

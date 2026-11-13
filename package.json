@@ -60,14 +60,18 @@
     "visualization",
     "onnx",
     "model-architecture",
+    "machine-learning",
+    "ml",
+    "training",
     "数据分析",
-    "可视化"
+    "可视化",
+    "机器学习"
   ],
   "license": "MIT",
   "author": "xiduo-wang <1253442021@qq.com>",
   "repository": {
     "type": "git",
-    "url": "https://github.com/xiduo-wang/dsh-datapilot.git"
+    "url": "git+https://github.com/xiduo-wang/dsh-datapilot.git"
   },
   "homepage": "https://github.com/xiduo-wang/dsh-datapilot#readme",
   "bugs": {

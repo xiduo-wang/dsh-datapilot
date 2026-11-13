@@ -188,6 +188,46 @@ svg.graph .node.desc rect{stroke:var(--ok)}
 #report-modal .m-head h3{flex:1; font-size:14px}
 #report-modal .m-body{padding:16px; overflow-y:auto; font-size:12px; line-height:1.65}
 #report-modal .m-foot{padding:10px 16px; border-top:1px solid var(--line); display:flex; justify-content:flex-end; gap:8px}
+
+/* 模型训练 */
+#train-modal{position:fixed; inset:0; background:rgba(0,0,0,.5); display:none; place-items:center; z-index:50}
+#train-modal.show{display:grid}
+#train-modal .m-box{background:var(--bg2); border:1px solid var(--line); border-radius:6px; width:min(1000px,96vw); max-height:92vh; display:flex; flex-direction:column; box-shadow:var(--shadow)}
+#train-modal .m-head{display:flex; align-items:center; padding:12px 16px; border-bottom:1px solid var(--line)}
+#train-modal .m-head h3{flex:1; font-size:14px}
+#train-modal .m-body{padding:16px; overflow-y:auto; font-size:12px; line-height:1.55}
+#train-form{display:grid; grid-template-columns:1fr 1fr; gap:10px 16px; padding-bottom:14px; border-bottom:1px solid var(--line)}
+#train-form .tf-full{grid-column:1/-1}
+#train-form label{display:block; font-size:11px; color:var(--text2); margin-bottom:4px}
+#train-form select,#train-form input[type=number],#train-form input[type=text]{width:100%; background:var(--bg3); border:1px solid var(--line); color:var(--text); border-radius:4px; padding:5px 8px; font-size:12px}
+#train-form select:focus,#train-form input:focus{outline:none; border-color:var(--accent); box-shadow:var(--focus-ring)}
+.task-pills{display:flex; gap:6px; flex-wrap:wrap}
+.task-pills .chip.selected{background:var(--accent); color:#fff; border-color:var(--accent)}
+.feat-chips{display:flex; flex-wrap:wrap; gap:5px; max-height:96px; overflow-y:auto; border:1px solid var(--line); border-radius:4px; padding:6px}
+.feat-chips .chip input{accent-color:var(--accent); margin:0 4px 0 0; vertical-align:middle}
+#train-results{margin-top:14px}
+.metric-cards{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px}
+.metric-card{flex:1; min-width:110px; background:var(--bg3); border:1px solid var(--line); border-radius:4px; padding:8px 12px}
+.metric-card .mv{font-size:18px; font-weight:600; font-variant-numeric:tabular-nums}
+.metric-card .ml{font-size:11px; color:var(--text2); margin-top:2px}
+.tr-chart{width:100%; background:var(--bg); border:1px solid var(--line); border-radius:4px; margin-bottom:12px}
+.tr-grid{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+.tr-panel{background:var(--bg); border:1px solid var(--line); border-radius:4px; padding:10px}
+.tr-panel h4{font-size:12px; margin:0 0 8px; color:var(--text2); font-weight:600}
+.tr-panel canvas{width:100%; display:block}
+.cm-table{border-collapse:collapse; width:100%; font-size:11px}
+.cm-table th,.cm-table td{border:1px solid var(--line); padding:3px 7px; text-align:center}
+.cm-table th{background:var(--bg3)}
+.cm-table td.diag{background:rgba(45,212,167,.15)}
+.mlp-flow{display:flex; align-items:center; gap:6px; overflow-x:auto; padding:10px 4px}
+.mlp-flow .lbox{border:1px solid var(--line); border-radius:4px; padding:8px 14px; text-align:center; background:var(--bg3); min-width:64px}
+.mlp-flow .lbox .ls{font-size:10px; color:var(--text2)}
+.mlp-flow .lbox .ln{font-size:12px; font-weight:600; margin-top:2px}
+.mlp-flow .lbox.hot{border-color:var(--accent); box-shadow:var(--focus-ring)}
+.mlp-flow .arr{color:var(--text3); font-size:14px}
+#train-status{color:var(--text2); font-size:12px; margin:6px 0}
+#train-status.err{color:var(--danger)}
+
 #report-body h1{font-size:18px; margin:0 0 10px}
 #report-body h2{font-size:15px; margin:18px 0 8px; border-bottom:1px solid var(--line); padding-bottom:4px}
 #report-body h3{font-size:13px; margin:12px 0 6px}
@@ -227,65 +267,66 @@ svg.graph .node.desc rect{stroke:var(--ok)}
 <header id="topbar">
   <div class="brand"><span class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg></span>DataPilot <span class="proto-tag" id="mode-badge">原型 / 模拟数据</span></div>
   <select id="ws-filter"><option value="">全部工作区</option></select>
-  <button class="btn" id="btn-add-root"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/></svg>根目录</button>
-  <button class="btn" id="btn-upload" title="上传本地数据集到共享工作区"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>上传</button>
+  <button class="btn" id="btn-add-root" data-i18n="root_dir"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/></svg>根目录</button>
+  <button class="btn" id="btn-upload" data-i18n="upload" data-i18n-title="upload_title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>上传</button>
   <input type="file" id="file-input" multiple accept=".csv,.tsv,.txt,.json,.jsonl,.ndjson,.parquet,.pq,.xlsx,.xls,.xlsm,.onnx" style="display:none">
-  <button class="btn icon" id="btn-rescan" title="重新扫描"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M3 21v-5h5"/></svg></button>
+  <button class="btn icon" id="btn-rescan" data-i18n-title="rescan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M3 21v-5h5"/></svg></button>
   <span class="spacer"></span>
-  <select id="cols-select" title="看板列数">
+  <select id="cols-select" data-i18n-title="cols_title">
     <option value="2">2 列</option><option value="3">3 列</option><option value="4">4 列</option>
   </select>
-  <button class="btn" id="btn-save-view"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>保存视图</button>
+  <button class="btn" id="btn-save-view" data-i18n="save_view"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>保存视图</button>
   <button class="btn" id="btn-md"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/><path d="M14 2v5h5"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>Markdown</button>
-  <button class="btn" id="btn-report" title="生成结构化数据分析报告"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 16v-5"/><path d="M12 16V8"/><path d="M17 16v-3"/></svg>报告</button>
+  <button class="btn" id="btn-report" data-i18n="report" data-i18n-title="report_title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 16v-5"/><path d="M12 16V8"/><path d="M17 16v-3"/></svg>报告</button>
+  <button class="btn" id="btn-train" data-i18n="train" data-i18n-title="train_title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>训练</button>
   <button class="btn" id="btn-theme" title="切换亮暗主题"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button>
   <button class="btn" id="btn-lang">EN</button>
-  <button class="btn icon" id="btn-settings" title="设置"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg></button>
+  <button class="btn icon" id="btn-settings" data-i18n-title="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg></button>
 </header>
 
 <div id="app">
   <aside id="left">
-    <div id="tree-search"><input type="search" id="tree-filter" placeholder="过滤文件 / 模型…" style="width:100%"></div>
+    <div id="tree-search"><input type="search" id="tree-filter" data-i18n-ph="filter_files" style="width:100%"></div>
     <div id="tree"></div>
   </aside>
 
   <main id="center">
     <div id="board-bar">
       <div id="board-tabs"></div>
-      <button class="btn icon" id="btn-new-board" title="新建看板"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg></button>
-      <span class="v-hint" id="v-hint">双击看板标签可重命名</span>
+      <button class="btn icon" id="btn-new-board" data-i18n-title="new_board"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg></button>
+      <span class="v-hint" id="v-hint" data-i18n="rename_hint"></span>
       <span style="flex:1"></span>
-      <button class="btn primary" id="btn-add-chart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14"/></svg>图</button>
+      <button class="btn primary" id="btn-add-chart" data-i18n="chart_btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14"/></svg>图</button>
     </div>
     <div id="board-wrap">
       <div id="board" class="cols2"></div>
     </div>
     <div id="empty">
       <div class="box">
-        <h2>工作台还是空的</h2>
-        <p>从左侧点击一个数据集，在右侧选择列后一键出图；或点右上角「添加图表」快速添加。也可以直接点 <span class="kbd">resnet50.onnx</span> 看模型结构。</p>
-        <button class="btn primary" id="btn-empty-add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14"/></svg>添加第一张图</button>
+        <h2 data-i18n="empty_title"></h2>
+        <p data-i18n="empty_body"></p>
+        <button class="btn primary" id="btn-empty-add" data-i18n="add_first_chart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14"/></svg>添加第一张图</button>
       </div>
     </div>
 
     <div id="modelview">
       <div id="mv-bar">
-        <button class="btn" id="mv-back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>返回看板</button>
-        <b id="mv-title">模型</b>
-        <label style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text2)"><input type="checkbox" id="mv-fold" checked> 折叠 BN/Relu/池化</label>
+        <button class="btn" id="mv-back" data-i18n="back_board"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>返回看板</button>
+        <b id="mv-title" data-i18n="model"></b>
+        <label style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text2)"><input type="checkbox" id="mv-fold" checked> <span data-i18n="fold_bn">折叠 BN/Relu/池化</span></label>
         <span style="flex:1"></span>
-        <input type="search" id="mv-search" placeholder="搜索节点…" style="width:180px">
-        <button class="btn" id="mv-info-toggle" title="显示/隐藏模型信息"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>信息</button>
-        <button class="btn" id="mv-fit">适应窗口</button>
+        <input type="search" id="mv-search" data-i18n-ph="search_nodes" style="width:180px">
+        <button class="btn" id="mv-info-toggle" data-i18n="info" data-i18n-title="info_title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>信息</button>
+        <button class="btn" id="mv-fit" data-i18n="fit"></button>
         <button class="btn" id="mv-export"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>SVG</button>
       </div>
       <div id="mv-canvas"><div id="mv-svg-wrap"></div></div>
       <div id="mv-info"></div>
       <div id="mv-legend">
-        <span><span class="sw" style="background:var(--accent)"></span>选中</span>
-        <span><span class="sw" style="background:var(--danger)"></span>上游</span>
-        <span><span class="sw" style="background:var(--ok)"></span>下游</span>
-        <span>滚轮缩放 / 拖拽平移</span>
+        <span data-i18n="selected"><span class="sw" style="background:var(--accent)"></span>选中</span>
+        <span data-i18n="upstream"><span class="sw" style="background:var(--danger)"></span>上游</span>
+        <span data-i18n="downstream"><span class="sw" style="background:var(--ok)"></span>下游</span>
+        <span data-i18n="zoom_pan">滚轮缩放 / 拖拽平移</span>
       </div>
     </div>
   </main>
@@ -296,17 +337,43 @@ svg.graph .node.desc rect{stroke:var(--ok)}
 </div>
 
 <div id="modal"><div class="m-box">
-  <div class="m-head"><h3 id="m-title">添加图表</h3><button class="btn icon" id="m-close" title="关闭"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button></div>
+  <div class="m-head"><h3 id="m-title" data-i18n="add_chart"></h3><button class="btn icon" id="m-close" title="关闭"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button></div>
   <div class="m-body" id="m-body"></div>
-  <div class="m-foot"><button class="btn" id="m-cancel">取消</button></div>
+  <div class="m-foot"><button class="btn" id="m-cancel" data-i18n="cancel"></button></div>
 </div></div>
 
 <div id="toast"></div>
 
 <div id="report-modal"><div class="m-box">
-  <div class="m-head"><h3 id="report-title">数据分析报告</h3><button class="btn icon" id="report-close" title="关闭"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button></div>
+  <div class="m-head"><h3 id="report-title" data-i18n="report_heading"></h3><button class="btn icon" id="report-close" title="关闭"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button></div>
   <div class="m-body" id="report-body"></div>
-  <div class="m-foot"><button class="btn" id="report-copy">复制 Markdown</button><button class="btn primary" id="report-download">下载 .md</button></div>
+  <div class="m-foot"><button class="btn" id="report-copy" data-i18n="copy_md"></button><button class="btn primary" id="report-download" data-i18n="download_md"></button></div>
+</div></div>
+
+<div id="train-modal"><div class="m-box">
+  <div class="m-head"><h3 id="train-title" data-i18n="train_heading"></h3><button class="btn icon" id="train-close" title="关闭"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button></div>
+  <div class="m-body">
+    <div id="train-form">
+      <div><label data-i18n="tr_dataset"></label><select id="tf-dataset"></select></div>
+      <div><label data-i18n="tr_task"></label><div class="task-pills" id="tf-task">
+        <button class="chip" data-task="regression" data-i18n="task_regression"></button>
+        <button class="chip" data-task="classification" data-i18n="task_classification"></button>
+        <button class="chip" data-task="clustering" data-i18n="task_clustering"></button>
+        <button class="chip" data-task="reduction" data-i18n="task_reduction"></button>
+      </div></div>
+      <div><label data-i18n="tr_model"></label><select id="tf-model"></select></div>
+      <div><label data-i18n="tr_target"></label><select id="tf-target"></select></div>
+      <div class="tf-full"><label data-i18n="tr_features"></label><div class="feat-chips" id="tf-features"></div></div>
+      <div class="tf-full"><label data-i18n="tr_params"></label><div id="tf-params" style="display:flex;gap:10px;flex-wrap:wrap"></div></div>
+      <div><label data-i18n="tr_test_split"></label><input type="number" id="tf-split" min="0.05" max="0.5" step="0.05" value="0.2"></div>
+      <div><label data-i18n="tr_seed"></label><input type="number" id="tf-seed" step="1" value="42"></div>
+      <div class="tf-full" style="display:flex;align-items:center;gap:12px">
+        <button class="btn primary" id="tf-run" data-i18n="tr_run"></button>
+        <span id="train-status"></span>
+      </div>
+    </div>
+    <div id="train-results"></div>
+  </div>
 </div></div>
 
 <script>
@@ -631,8 +698,8 @@ function buildGraph(which){
  * ========================================================================= */
 let state = {
   theme: (localStorage.getItem('dp.theme')||'dark'),
-  lang: 'zh',
-  title: '未命名看板',
+  lang: (localStorage.getItem('dp.lang')||'zh'),
+  title: '',
   selDs: null,          // 当前选中数据集 id
   selCard: null,        // 当前选中卡片 id
   board: [],            // 当前活动看板的卡片数组（= state.boards[activeBoard].cards 的引用）
@@ -641,18 +708,140 @@ let state = {
   modelMode: null,      // {modelId, graph, transform}
   cardSeq: 1,
 };
-state.boards = [{ id: 'b1', title: '未命名看板', cards: state.board }];
+state.boards = [{ id: 'b1', title: '', cards: state.board }];
 const I18N = {
-  zh: { title:'数据工作台', board:'看板', add:'添加图表', save:'保存视图', export:'导出', settings:'设置',
-        empty_title:'工作台还是空的', empty_body:'从左侧点击一个数据集…', col:'列', rows:'行', type:'类型',
-        profile:'数据画像', add_chart:'添加图表', histogram:'直方图', box:'箱线图', violin:'小提琴', ecdf:'ECDF',
-        bar:'条形图', line:'折线图', scatter:'散点图', corr:'相关矩阵', missing:'缺失矩阵' },
-  en: { title:'DataPilot', board:'Board', add:'Add chart', save:'Save view', export:'Export', settings:'Settings',
-        empty_title:'Empty board', empty_body:'Pick a dataset on the left…', col:'cols', rows:'rows', type:'type',
-        profile:'Profile', add_chart:'Add chart', histogram:'Histogram', box:'Box', violin:'Violin', ecdf:'ECDF',
-        bar:'Bar', line:'Line', scatter:'Scatter', corr:'Correlation', missing:'Missingness' },
+  zh: {
+    title:'数据工作台', board:'看板', add_chart:'添加图表', save:'保存视图', export:'导出', settings:'设置',
+    col:'列', rows:'行', type:'类型', profile:'数据画像', close:'关闭', cancel:'取消',
+    histogram:'直方图', box:'箱线图', violin:'小提琴', ecdf:'ECDF', bar:'条形图', line:'折线图',
+    scatter:'散点图', corr:'相关矩阵', missing:'缺失矩阵',
+    root_dir:'根目录', upload:'上传', save_view:'保存视图', report:'报告', report_title:'生成结构化数据分析报告',
+    filter_files:'过滤文件 / 模型…', new_board:'新建看板', rename_hint:'双击看板标签可重命名', chart_btn:'图',
+    rescan:'重新扫描', upload_title:'上传本地数据集到共享工作区', cols_title:'看板列数', theme_toggle:'切换亮暗主题',
+    empty_title:'工作台还是空的', empty_body:'从左侧点击一个数据集查看画像，或用上方按钮上传本地数据 / 挂载目录。',
+    add_first_chart:'添加第一张图',
+    back_board:'返回看板', model:'模型', fold_bn:'折叠 BN/Relu/池化', search_nodes:'搜索节点…', info:'信息',
+    fit:'适应窗口', selected:'选中', upstream:'上游', downstream:'下游', zoom_pan:'滚轮缩放 / 拖拽平移',
+    info_title:'显示/隐藏模型信息', close_info:'关闭信息',
+    inspector:'检查器', inspector_hint:'选择一个数据集查看画像，或点选一张图调整设置。', dataset:'数据集',
+    file:'文件', location:'位置', size:'规模', format:'格式', sheet:'工作表', readonly:'只读预览',
+    schema_cached:'schema 已缓存', col_profile_hint:'列画像（点击列可出图）', cardinality:'基数', missing_k:'缺失',
+    outliers:'离群', chart_settings:'图表设置', data_source:'数据源', source:'来源', title_l:'标题',
+    binning:'分箱', bins:'桶数', log_bins:'对数桶', density:'密度着色', dup_overlay:'复制叠加',
+    export_png:'导出PNG', delete_chart:'删除此图', dup_title:'复制叠加', png_title:'导出PNG', del_title:'删除',
+    model_info:'模型', ops_dist:'算子分布', graph_parsed:'ONNX 图已解析', meta_only:'仅元数据',
+    protobuf_parsed:'protobuf 已解析', modified:'修改时间', ops:'算子', params:'参数', input:'输入', output:'输出',
+    graph_nodes:'图节点', edges:'边', cannot_parse:'无法解析模型结构', metadata_mode:'ONNX 元数据模式',
+    graph_unavailable:'模型结构图不可用', unknown_format:'未知格式', arch_type:'结构图纸（图片）', input_image:'输入图像',
+    arch_source:'draw.io 导出', arch_gallery:'图片画廊模式',
+    report_heading:'数据分析报告', generating:'正在分析 {n} 个数据集…', report_ok:'数据分析报告 · {n} 个数据集',
+    report_gen_failed:'生成失败：', no_report:'暂无报告', proto_mode_report:'原型模式：报告需连接真实数据引擎',
+    no_datasets:'没有可分析的数据集', copy:'复制', download:'下载', copy_md:'复制 Markdown', download_md:'下载 .md',
+    toast_add_root:'已添加根目录', toast_add_fail:'添加失败：', prompt_root:'输入要挂载的目录绝对路径（例如 D:\\data）',
+    proto_mode_root:'原型模式：目录选择器将在真实插件中调用', rescanning:'正在扫描…', rescan_done:'扫描完成',
+    rescan_mock:'已重新扫描（模拟）', toast_uploaded:'已上传 {n} 个文件', upload_fail:'上传失败',
+    proto_mode_upload:'原型模式：上传需真实插件', toast_saved:'视图已保存到本地（{k}）', toast_restored:'已恢复最近视图',
+    toast_png:'已导出 PNG', toast_svg:'已导出 SVG', toast_md:'Markdown 已复制到剪贴板',
+    toast_copy_fail:'复制失败，见控制台', board_empty:'看板为空', keep_one_board:'至少保留一个看板',
+    rename_board:'看板名称', board_default:'未命名看板', board_new:'看板 {n}', close_board:'关闭看板',
+    copy_ok:'已复制 Markdown', copy_fail:'复制失败', no_peer_col:'没有其他数据集含同名列', toast_overlay:'已叠加',
+    settings_toast:'设置：限额 / 采样 / 缓存（见 PRD §FR-10）', sheet_fail:'切换工作表失败：', unknown_error:'未知错误',
+    no_numeric:'该列没有可绘制的数值', no_data:'该列没有数据', bar_need_cat:'条形图需要类别列',
+    no_corr:'无可用的数值列进行相关分析', no_columns:'没有列可显示', index:'索引',
+    picker_hint:'选择数据集 → 展开列 → 点图表类型', md_source:'数据源', md_stat:'统计', md_missing:'缺失',
+    live_mode:'实时 / {n} 工作区', mock_mode:'原型 / 模拟数据', all_workspaces:'全部工作区', workspaces:'工作区',
+    train:'训练', train_title:'训练机器学习模型', train_heading:'模型训练',
+    tr_dataset:'数据集', tr_task:'任务', tr_model:'模型', tr_target:'目标列', tr_features:'特征列', tr_params:'参数',
+    tr_test_split:'测试集比例', tr_seed:'随机种子', tr_run:'开始训练',
+    task_regression:'回归', task_classification:'分类', task_clustering:'聚类', task_reduction:'降维',
+    tr_training:'训练中…', tr_done:'训练完成 · {ms} ms', tr_failed:'训练失败：',
+    tr_no_dataset:'请先选择数据集', tr_no_features:'请至少选择一个特征列', tr_no_target:'请选择目标列',
+    tr_need_open:'请先在左侧点击数据集名打开它', tr_clustering_no_target:'聚类/降维不需要目标列',
+    metric_accuracy:'准确率', metric_precision:'精确率', metric_recall:'召回率', metric_f1:'F1',
+    metric_r2:'R²', metric_mse:'MSE', metric_rmse:'RMSE', metric_mae:'MAE',
+    metric_inertia:'簇内平方和', metric_silhouette:'轮廓系数', metric_evr:'解释方差比',
+    tr_loss_curve:'损失曲线', tr_grad_curve:'梯度范数曲线', tr_confusion:'混淆矩阵',
+    tr_regress_scatter:'预测 vs 真实', tr_boundary:'决策边界', tr_cluster_scatter:'聚类结果',
+    tr_pca_plot:'PCA 投影', tr_mlp_flow:'MLP 数据流', tr_n_clusters:'簇数', tr_params_count:'参数量',
+    tr_no_history:'（该模型无迭代训练历史）', tr_y_true:'真实', tr_y_pred:'预测', tr_epoch:'轮次',
+    tr_lr:'学习率', tr_epochs:'轮数', tr_hidden:'隐藏层（逗号分隔）', tr_activation:'激活函数', tr_optimizer:'优化器',
+    tr_n_clusters_p:'聚类数', tr_n_components:'主成分数', tr_k:'近邻数', tr_C:'正则强度 C',
+  },
+  en: {
+    title:'DataPilot', board:'Board', add_chart:'Add chart', save:'Save view', export:'Export', settings:'Settings',
+    col:'cols', rows:'rows', type:'type', profile:'Profile', close:'Close', cancel:'Cancel',
+    histogram:'Histogram', box:'Box', violin:'Violin', ecdf:'ECDF', bar:'Bar', line:'Line',
+    scatter:'Scatter', corr:'Correlation', missing:'Missingness',
+    root_dir:'Add root', upload:'Upload', save_view:'Save view', report:'Report', report_title:'Generate analysis report',
+    filter_files:'Filter files / models…', new_board:'New board', rename_hint:'Double-click a board tab to rename', chart_btn:'Chart',
+    rescan:'Rescan', upload_title:'Upload local datasets to the shared workspace', cols_title:'Board columns', theme_toggle:'Toggle theme',
+    empty_title:'Empty board', empty_body:'Click a dataset on the left for its profile, or upload / mount data with the buttons above.',
+    add_first_chart:'Add first chart',
+    back_board:'Back to board', model:'Model', fold_bn:'Fold BN/ReLU/pool', search_nodes:'Search nodes…', info:'Info',
+    fit:'Fit view', selected:'Selected', upstream:'Upstream', downstream:'Downstream', zoom_pan:'Wheel zoom / drag pan',
+    info_title:'Show/hide model info', close_info:'Close info',
+    inspector:'Inspector', inspector_hint:'Select a dataset for its profile, or click a chart to edit it.', dataset:'Dataset',
+    file:'File', location:'Location', size:'Size', format:'Format', sheet:'Sheet', readonly:'Read-only preview',
+    schema_cached:'schema cached', col_profile_hint:'Column profile (click a column to chart)', cardinality:'Cardinality', missing_k:'Missing',
+    outliers:'Outliers', chart_settings:'Chart settings', data_source:'Data source', source:'Source', title_l:'Title',
+    binning:'Binning', bins:'Bins', log_bins:'Log bins', density:'Density shading', dup_overlay:'Duplicate overlay',
+    export_png:'Export PNG', delete_chart:'Delete chart', dup_title:'Duplicate overlay', png_title:'Export PNG', del_title:'Delete',
+    model_info:'Model', ops_dist:'Op distribution', graph_parsed:'ONNX graph parsed', meta_only:'Metadata only',
+    protobuf_parsed:'protobuf parsed', modified:'Modified', ops:'Ops', params:'Params', input:'Input', output:'Output',
+    graph_nodes:'Graph nodes', edges:'Edges', cannot_parse:'Cannot parse model graph', metadata_mode:'ONNX metadata mode',
+    graph_unavailable:'Model graph unavailable', unknown_format:'Unknown format', arch_type:'Architecture diagram (image)', input_image:'Input image',
+    arch_source:'draw.io export', arch_gallery:'Image gallery mode',
+    report_heading:'Data analysis report', generating:'Analyzing {n} dataset(s)…', report_ok:'Analysis report · {n} dataset(s)',
+    report_gen_failed:'Generation failed: ', no_report:'No report yet', proto_mode_report:'Prototype mode: report needs the real data engine',
+    no_datasets:'No datasets to analyze', copy:'Copy', download:'Download', copy_md:'Copy Markdown', download_md:'Download .md',
+    toast_add_root:'Root added', toast_add_fail:'Add failed: ', prompt_root:'Enter an absolute directory path (e.g. D:\\data)',
+    proto_mode_root:'Prototype mode: the directory picker works in the real plugin', rescanning:'Scanning…', rescan_done:'Scan complete',
+    rescan_mock:'Rescanned (mock)', toast_uploaded:'Uploaded {n} file(s)', upload_fail:'Upload failed',
+    proto_mode_upload:'Prototype mode: upload needs the real plugin', toast_saved:'View saved locally ({k})', toast_restored:'Recent view restored',
+    toast_png:'PNG exported', toast_svg:'SVG exported', toast_md:'Markdown copied to clipboard',
+    toast_copy_fail:'Copy failed, see console', board_empty:'Board is empty', keep_one_board:'Keep at least one board',
+    rename_board:'Board name', board_default:'Untitled board', board_new:'Board {n}', close_board:'Close board',
+    copy_ok:'Markdown copied', copy_fail:'Copy failed', no_peer_col:'No other dataset has a same-named column', toast_overlay:'Overlay added',
+    settings_toast:'Settings: limits / sampling / cache (see PRD §FR-10)', sheet_fail:'Sheet switch failed: ', unknown_error:'Unknown error',
+    no_numeric:'No plottable numeric values in this column', no_data:'No data in this column', bar_need_cat:'Bar chart needs a categorical column',
+    no_corr:'No numeric columns available for correlation', no_columns:'No columns to display', index:'index',
+    picker_hint:'Select a dataset → expand a column → click a chart type', md_source:'Source', md_stat:'Stats', md_missing:'Missing',
+    live_mode:'Live / {n} workspace(s)', mock_mode:'Prototype / mock data', all_workspaces:'All workspaces', workspaces:'Workspaces',
+    train:'Train', train_title:'Train ML models', train_heading:'Model training',
+    tr_dataset:'Dataset', tr_task:'Task', tr_model:'Model', tr_target:'Target column', tr_features:'Feature columns', tr_params:'Parameters',
+    tr_test_split:'Test split', tr_seed:'Random seed', tr_run:'Train',
+    task_regression:'Regression', task_classification:'Classification', task_clustering:'Clustering', task_reduction:'Dimensionality reduction',
+    tr_training:'Training…', tr_done:'Training done · {ms} ms', tr_failed:'Training failed: ',
+    tr_no_dataset:'Select a dataset first', tr_no_features:'Select at least one feature column', tr_no_target:'Select a target column',
+    tr_need_open:'Open a dataset first (click its name on the left)', tr_clustering_no_target:'Clustering/reduction do not need a target column',
+    metric_accuracy:'Accuracy', metric_precision:'Precision', metric_recall:'Recall', metric_f1:'F1',
+    metric_r2:'R²', metric_mse:'MSE', metric_rmse:'RMSE', metric_mae:'MAE',
+    metric_inertia:'Inertia', metric_silhouette:'Silhouette', metric_evr:'Explained variance ratio',
+    tr_loss_curve:'Loss curve', tr_grad_curve:'Gradient norm curve', tr_confusion:'Confusion matrix',
+    tr_regress_scatter:'Predicted vs true', tr_boundary:'Decision boundary', tr_cluster_scatter:'Clustering result',
+    tr_pca_plot:'PCA projection', tr_mlp_flow:'MLP dataflow', tr_n_clusters:'Clusters', tr_params_count:'Parameters',
+    tr_no_history:'(no iterative training history)', tr_y_true:'True', tr_y_pred:'Predicted', tr_epoch:'Epoch',
+    tr_lr:'Learning rate', tr_epochs:'Epochs', tr_hidden:'Hidden layers (comma-separated)', tr_activation:'Activation', tr_optimizer:'Optimizer',
+    tr_n_clusters_p:'Clusters', tr_n_components:'Components', tr_k:'Neighbors k', tr_C:'Regularization C',
+  },
 };
 const t = k => (I18N[state.lang][k] ?? I18N.zh[k] ?? k);
+function tf(k, vars){ let s = t(k); if(vars) for (const [key,val] of Object.entries(vars)) s = s.replace(new RegExp('\\{'+key+'\\}','g'), String(val)); return s; }
+function applyStaticLang(){
+  document.documentElement.lang = state.lang;
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const k = el.getAttribute('data-i18n');
+    if(el.children.length){
+      [...el.childNodes].forEach(n=>{ if(n.nodeType===3) el.removeChild(n); });
+      el.appendChild(document.createTextNode(t(k)));
+    } else {
+      el.textContent = t(k);
+    }
+  });
+  document.querySelectorAll('[data-i18n-title]').forEach(el=>el.title = t(el.getAttribute('data-i18n-title')));
+  document.querySelectorAll('[data-i18n-ph]').forEach(el=>el.placeholder = t(el.getAttribute('data-i18n-ph')));
+  $('#btn-lang').textContent = state.lang==='zh' ? 'EN' : '中';
+}
 
 /* ---- 图标系统：手绘 SVG，统一描边/圆角/粗细（Lucide 风格，ISC 许可） ---- */
 const ICON_D = {
@@ -685,7 +874,7 @@ function renderTree(){
     for(const d of dss){
       if(f && !d.file.toLowerCase().includes(f)) continue;
       html += `<div class="tree-item ${state.selDs===d.id?'sel':''}" data-ds="${d.id}">
-        <span class="ico">${svgIcon('file',14)}</span><span class="fname">${d.file}</span><span class="meta">${d.rows==='?'?d.size:(fmt(d.rows)+'行')}</span></div>`;
+        <span class="ico">${svgIcon('file',14)}</span><span class="fname">${d.file}</span><span class="meta">${d.rows==='?'?d.size:(fmt(d.rows)+t('rows'))}</span></div>`;
     }
     for(const m of models){
       if(f && !m.file.toLowerCase().includes(f)) continue;
@@ -697,7 +886,7 @@ function renderTree(){
   tree.innerHTML = html;
   $$('.g-head', tree).forEach(h=>h.onclick=()=>h.parentElement.classList.toggle('open'));
 }
-function fmt(n){ if(n>=1e8) return (n/1e8).toFixed(1)+'亿'; if(n>=1e4) return (n/1e4).toFixed(1)+'万'; return String(n); }
+function fmt(n){ if(state.lang==='zh'){ if(n>=1e8) return (n/1e8).toFixed(1)+'亿'; if(n>=1e4) return (n/1e4).toFixed(1)+'万'; return String(n); } if(n>=1e9) return (n/1e9).toFixed(1)+'B'; if(n>=1e6) return (n/1e6).toFixed(1)+'M'; if(n>=1e3) return (n/1e3).toFixed(1)+'K'; return String(n); }
 
 /* ---------- 渲染：右侧检查器 ---------- */
 async function renderInspector(){
@@ -705,22 +894,22 @@ async function renderInspector(){
   if(state.modelMode){ renderModelInspector(el); return; }
   if(state.selCard){ const c=state.board.find(x=>x.id===state.selCard); if(c) return renderCardInspector(el,c); }
   if(state.selDs){ return renderDsInspector(el); }
-  el.innerHTML = `<div class="ins-sec"><h4>检查器</h4>
-    <div style="color:var(--text2);font-size:12px">选择一个数据集查看画像，或点选一张图调整设置。</div></div>`;
+  el.innerHTML = `<div class="ins-sec"><h4>${t('inspector')}</h4>
+    <div style="color:var(--text2);font-size:12px">${t('inspector_hint')}</div></div>`;
 }
 async function renderDsInspector(el){
   const ds=dsById(state.selDs); const ws=wsOf(ds);
   const profs = await profileAll(ds.id);
   const cols = colsOf(ds);
-  let h=`<div class="ins-sec"><h4>数据集</h4>
-    <div class="kv"><span class="k">文件</span><span class="v">${ds.file}</span></div>
-    <div class="kv"><span class="k">位置</span><span class="v">${ws.name}</span></div>
-    <div class="kv"><span class="k">规模</span><span class="v">${ds.rows==='?'?ds.size:(fmt(ds.rows)+' × '+ds.cols+' 列')}</span></div>
-    <div class="kv"><span class="k">格式</span><span class="v">${ds.type} / ${ds.size}</span></div>
-    ${(ds.sheets&&ds.sheets.length>1)?`<div class="kv"><span class="k">工作表</span><span class="v"><select id="ds-sheet" style="max-width:160px">${ds.sheets.map(s=>`<option value="${escapeAttr(s.name)}" ${s.name===ds.sheetName?'selected':''}>${s.name}（${s.rowCount}行）</option>`).join('')}</select></span></div>`:''}
-    <div style="margin-top:8px"><span class="badge ok">只读预览</span> <span class="badge">schema 已缓存</span></div>
+  let h=`<div class="ins-sec"><h4>${t('dataset')}</h4>
+    <div class="kv"><span class="k">${t('file')}</span><span class="v">${ds.file}</span></div>
+    <div class="kv"><span class="k">${t('location')}</span><span class="v">${ws.name}</span></div>
+    <div class="kv"><span class="k">${t('size')}</span><span class="v">${ds.rows==='?'?ds.size:(fmt(ds.rows)+' × '+ds.cols+' '+t('col'))}</span></div>
+    <div class="kv"><span class="k">${t('format')}</span><span class="v">${ds.type} / ${ds.size}</span></div>
+    ${(ds.sheets&&ds.sheets.length>1)?`<div class="kv"><span class="k">${t('sheet')}</span><span class="v"><select id="ds-sheet" style="max-width:160px">${ds.sheets.map(s=>`<option value="${escapeAttr(s.name)}" ${s.name===ds.sheetName?'selected':''}>${s.name} (${s.rowCount} ${t('rows')})</option>`).join('')}</select></span></div>`:''}
+    <div style="margin-top:8px"><span class="badge ok">${t('readonly')}</span> <span class="badge">${t('schema_cached')}</span></div>
   </div>`;
-  h+=`<div class="ins-sec"><h4>列画像（点击列可出图）</h4>`;
+  h+=`<div class="ins-sec"><h4>${t('col_profile_hint')}</h4>`;
   for(const cn of cols){
     const p=profs[cn] || {type:'string', topK:[], distinct:0, nulls:0, mean:0, std:0, qs:{}, outliers:{out15:0}};
     h+=`<div class="col-row" data-col="${cn}">
@@ -736,50 +925,50 @@ async function renderDsInspector(el){
     try{
       if(LIVE){ delete LIVE.openCache[ds.id]; delete LIVE.schema[ds.id]; await ensureOpen(ds.id, name); }
       await render();
-    }catch(err){ toast('切换工作表失败：'+err.message); }
+    }catch(err){ toast(t('sheet_fail')+err.message); }
   });
 }
 function colStats(p){
   if(p.type==='category'){
     const tk=p.topK.slice(0,3).map(x=>`${x.value}(${x.count})`).join(' ');
-    return `基数 ${p.distinct} / 缺失 ${pct(p.nulls)} / ${tk}`;
+    return `${t('cardinality')} ${p.distinct} / ${t('missing_k')} ${pct(p.nulls)} / ${tk}`;
   }
-  return `μ ${p.mean.toFixed(3)} σ ${p.std.toFixed(3)} / P50 ${p.qs.p50.toFixed(3)} / P99 ${p.qs.p99.toFixed(3)} / 缺失 ${pct(p.nulls)} / 离群 ${p.outliers.out15}`;
+  return `μ ${p.mean.toFixed(3)} σ ${p.std.toFixed(3)} / P50 ${p.qs.p50.toFixed(3)} / P99 ${p.qs.p99.toFixed(3)} / ${t('missing_k')} ${pct(p.nulls)} / ${t('outliers')} ${p.outliers.out15}`;
 }
 function pct(v){ return (v*100).toFixed(2)+'%'; }
 function colActions(dsId, cn, p){
   const acts = p.type==='category'
-    ? [['bar','条形图']]
-    : [['hist','直方图'],['box','箱线图'],['violin','小提琴'],['line','折线'],['scatter','散点'],['ecdf','ECDF']];
+    ? [['bar',t('bar')]]
+    : [['hist',t('histogram')],['box',t('box')],['violin',t('violin')],['line',t('line')],['scatter',t('scatter')],['ecdf',t('ecdf')]];
   return acts.map(([kind,label])=>`<button class="chip" data-add="${kind}" data-ds="${dsId}" data-col="${cn}">${label}</button>`).join('')
-       + `<button class="chip" data-add="missing" data-ds="${dsId}" data-col="${cn}">缺失</button>`
-       + `<button class="chip" data-add="corr" data-ds="${dsId}" data-col="${cn}">相关</button>`;
+       + `<button class="chip" data-add="missing" data-ds="${dsId}" data-col="${cn}">${t('missing')}</button>`
+       + `<button class="chip" data-add="corr" data-ds="${dsId}" data-col="${cn}">${t('corr')}</button>`;
 }
 function renderCardInspector(el, c){
   const ds=dsById(c.dsId); const ws=wsOf(ds);
-  const kinds={hist:'直方图',box:'箱线图',violin:'小提琴',ecdf:'ECDF',bar:'条形图',line:'折线图',scatter:'散点图',corr:'相关矩阵',missing:'缺失矩阵'};
-  let h=`<div class="ins-sec"><h4>图表设置</h4>
-    <div class="kv"><span class="k">类型</span><span class="v">${kinds[c.kind]||c.kind}</span></div>
-    <div class="kv"><span class="k">数据源</span><span class="v">${ds.file} / ${c.col}</span></div>
-    <div class="kv"><span class="k">来源</span><span class="v">${ws.name}</span></div>
-    <div class="kv"><span class="k">标题</span><span class="v"><input type="text" id="card-title" value="${escapeAttr(c.title)}" style="width:100%"></span></div>
+  const kinds={hist:t('histogram'),box:t('box'),violin:t('violin'),ecdf:t('ecdf'),bar:t('bar'),line:t('line'),scatter:t('scatter'),corr:t('corr'),missing:t('missing')};
+  let h=`<div class="ins-sec"><h4>${t('chart_settings')}</h4>
+    <div class="kv"><span class="k">${t('type')}</span><span class="v">${kinds[c.kind]||c.kind}</span></div>
+    <div class="kv"><span class="k">${t('data_source')}</span><span class="v">${ds.file} / ${c.col}</span></div>
+    <div class="kv"><span class="k">${t('source')}</span><span class="v">${ws.name}</span></div>
+    <div class="kv"><span class="k">${t('title_l')}</span><span class="v"><input type="text" id="card-title" value="${escapeAttr(c.title)}" style="width:100%"></span></div>
   </div>`;
   if(['hist'].includes(c.kind)){
-    h+=`<div class="ins-sec"><h4>分箱</h4>
-      <div class="kv"><span class="k">桶数</span><span class="v"><input type="number" id="card-bins" value="${c.opts.bins}" min="5" max="200"></span></div>
-      <div class="kv"><span class="k">对数桶</span><span class="v"><input type="checkbox" id="card-log" ${c.opts.log?'checked':''}></span></div>
+    h+=`<div class="ins-sec"><h4>${t('binning')}</h4>
+      <div class="kv"><span class="k">${t('bins')}</span><span class="v"><input type="number" id="card-bins" value="${c.opts.bins}" min="5" max="200"></span></div>
+      <div class="kv"><span class="k">${t('log_bins')}</span><span class="v"><input type="checkbox" id="card-log" ${c.opts.log?'checked':''}></span></div>
     </div>`;
   }
   if(c.kind==='scatter'){
-    h+=`<div class="ins-sec"><h4>散点</h4>
-      <div class="kv"><span class="k">密度着色</span><span class="v"><input type="checkbox" id="card-density" ${c.opts.density?'checked':''}></span></div>
+    h+=`<div class="ins-sec"><h4>${t('scatter')}</h4>
+      <div class="kv"><span class="k">${t('density')}</span><span class="v"><input type="checkbox" id="card-density" ${c.opts.density?'checked':''}></span></div>
     </div>`;
   }
   h+=`<div class="ins-sec">
     <div class="col-actions" style="flex-direction:column;gap:6px;display:flex">
-      <button class="btn" id="card-dup" style="justify-content:center">${svgIcon('copy',14)} 复制并叠加另一工作区</button>
-      <button class="btn" id="card-export" style="justify-content:center">${svgIcon('download',14)} 导出 PNG</button>
-      <button class="btn" id="card-del" style="justify-content:center;color:var(--danger)">${svgIcon('trash',14)} 删除此图</button>
+      <button class="btn" id="card-dup" style="justify-content:center">${svgIcon('copy',14)} ${t('dup_overlay')}</button>
+      <button class="btn" id="card-export" style="justify-content:center">${svgIcon('download',14)} ${t('export_png')}</button>
+      <button class="btn" id="card-del" style="justify-content:center;color:var(--danger)">${svgIcon('trash',14)} ${t('delete_chart')}</button>
     </div>
   </div>`;
   el.innerHTML=h;
@@ -795,15 +984,15 @@ function renderModelInspector(el){
   const m=MODELS.find(x=>x.id===state.modelMode.modelId);
   const meta=m.meta||{};
   const badge = LIVE
-    ? (meta.graph ? '<span class="badge ok">ONNX 图已解析</span>' : '<span class="badge">仅元数据</span>')
-    : '<span class="badge ok">protobuf 已解析</span>';
-  el.innerHTML=`<div class="ins-sec"><h4>模型</h4>
-    <div class="kv"><span class="k">文件</span><span class="v">${m.file}</span></div>
-    <div class="kv"><span class="k">大小</span><span class="v">${meta.size? humanSize(meta.size) : m.size}</span></div>
+    ? (meta.graph ? '<span class="badge ok">'+t('graph_parsed')+'</span>' : '<span class="badge">'+t('meta_only')+'</span>')
+    : '<span class="badge ok">'+t('protobuf_parsed')+'</span>';
+  el.innerHTML=`<div class="ins-sec"><h4>${t('model_info')}</h4>
+    <div class="kv"><span class="k">${t('file')}</span><span class="v">${m.file}</span></div>
+    <div class="kv"><span class="k">${t('size')}</span><span class="v">${meta.size? humanSize(meta.size) : m.size}</span></div>
     ${Object.entries(meta).filter(([k,v])=>!['producer','graph','reason','format','size','mtime','model','path','name','ok'].includes(k) && (v===null||typeof v!=='object')).map(([k,v])=>`<div class="kv"><span class="k">${k}</span><span class="v">${v}</span></div>`).join('')}
     <div style="margin-top:8px">${badge}</div>
   </div>
-  <div class="ins-sec"><h4>算子分布</h4>
+  <div class="ins-sec"><h4>${t('ops_dist')}</h4>
     <div class="mini-legend" id="op-legend"></div>
   </div>`;
   const g=state.modelMode && state.modelMode.graph;
@@ -824,9 +1013,9 @@ async function renderBoard(){
         <span class="src" style="background:${ws.color}"></span>
         <span class="c-title">${escapeHtml(c.title)}</span>
         <span class="c-sub">${ds.file}${c.col?' / '+c.col:''}</span>
-        <button data-act="dup" title="复制叠加">${svgIcon('copy',13)}</button>
-        <button data-act="png" title="导出PNG">${svgIcon('download',13)}</button>
-        <button data-act="del" title="删除">${svgIcon('trash',13)}</button>
+        <button data-act="dup" title="${t('dup_title')}">${svgIcon('copy',13)}</button>
+        <button data-act="png" title="${t('png_title')}">${svgIcon('download',13)}</button>
+        <button data-act="del" title="${t('del_title')}">${svgIcon('trash',13)}</button>
       </div>`;
     const cv=document.createElement('canvas'); cv.height=0; card.appendChild(cv);
     b.appendChild(card);
@@ -947,7 +1136,7 @@ async function drawChart(cv, c){
   if(kind==='hist'){
     const s=await sample(c.dsId,c.col,12000);
     const vals=[...s.values].filter(v=>!isNaN(v));
-    if(!vals.length){ empty('该列没有可绘制的数值'); return; }
+    if(!vals.length){ empty(t('no_numeric')); return; }
     const mn=Math.min(...vals), mx=Math.max(...vals);
     const bins=c.opts.bins||40, counts=new Array(bins).fill(0);
     let edgeLo=mn, edgeHi=mx;
@@ -984,7 +1173,7 @@ async function drawChart(cv, c){
     for(let i=0;i<groups.length;i++){ const g=groups[i]; const sv=await sample(g.dsId,g.col,12000);
       const vals=qsort([...sv.values].filter(v=>!isNaN(v)));
       if(vals.length) cols.push({label:g.label, color:PALETTE[i%PALETTE.length], v:vals}); }
-    if(!cols.length){ empty('没有可绘制的数值'); return; }
+    if(!cols.length){ empty(t('no_numeric')); return; }
     let lo=Infinity,hi=-Infinity; for(const g of cols){ lo=Math.min(lo,g.v[0]); hi=Math.max(hi,g.v[g.v.length-1]); }
     const t=niceTicks(lo,hi,5);
     const sy=v=>pad.t+H-(v-t.min)/((t.max-t.min)||1)*H;
@@ -1006,7 +1195,7 @@ async function drawChart(cv, c){
     for(let i=0;i<groups.length;i++){ const g=groups[i]; const sv=await sample(g.dsId,g.col,12000);
       const vals=qsort([...sv.values].filter(v=>!isNaN(v)));
       if(vals.length) cols.push({label:g.label, color:PALETTE[i%PALETTE.length], v:vals}); }
-    if(!cols.length){ empty('没有可绘制的数值'); return; }
+    if(!cols.length){ empty(t('no_numeric')); return; }
     let lo=Infinity,hi=-Infinity; for(const g of cols){ lo=Math.min(lo,g.v[0]); hi=Math.max(hi,g.v[g.v.length-1]); }
     const t=niceTicks(lo,hi,5);
     const sy=v=>pad.t+H-(v-t.min)/((t.max-t.min)||1)*H;
@@ -1031,7 +1220,7 @@ async function drawChart(cv, c){
       const v=qsort([...sv.values].filter(x=>!isNaN(x))); if(!v.length) continue;
       lo=Math.min(lo,v[0]); hi=Math.max(hi,v[v.length-1]);
       data.push({label:g.label, color:PALETTE[i%PALETTE.length], v}); }
-    if(!data.length){ empty('没有可绘制的数值'); return; }
+    if(!data.length){ empty(t('no_numeric')); return; }
     axes(); yAxis(0,1,(v)=>pad.t+H-v*H); xAxisNum(lo,hi);
     data.forEach((g,i)=>{ const v=g.v; const step=Math.max(1,Math.floor(v.length/400));
       ctx.strokeStyle=g.color; ctx.lineWidth=1.6; ctx.beginPath();
@@ -1044,10 +1233,10 @@ async function drawChart(cv, c){
   }
   else if(kind==='bar'){
     const s=await sample(c.dsId,c.col,12000);
-    if(!s.cat){ empty('条形图需要类别列'); return; }
+    if(!s.cat){ empty(t('bar_need_cat')); return; }
     const counts={}; for(const v of s.values) counts[v]=(counts[v]||0)+1;
     const items=Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,12);
-    if(!items.length){ empty('该列没有数据'); return; }
+    if(!items.length){ empty(t('no_data')); return; }
     const top=niceTicks(0,Math.max(...items.map(it=>it[1])),4).max;
     const sy=v=>pad.t+H-v/top*H;
     axes(); yAxis(0,top,sy);
@@ -1062,7 +1251,7 @@ async function drawChart(cv, c){
       const base=[...sv.values].filter(v=>!isNaN(v)); if(!base.length) continue;
       lo=Math.min(lo,Math.min(...base)); hi=Math.max(hi,Math.max(...base));
       series.push({label:g.label, color:PALETTE[i%PALETTE.length], base}); }
-    if(!series.length){ empty('没有可绘制的数值'); return; }
+    if(!series.length){ empty(t('no_numeric')); return; }
     const t=niceTicks(lo,hi,5);
     const sy=v=>pad.t+H-(v-t.min)/((t.max-t.min)||1)*H;
     axes(); yAxis(lo,hi,sy); xAxisNum(0,59);
@@ -1073,12 +1262,12 @@ async function drawChart(cv, c){
       ctx.font='11px '+SANS_STACK; ctx.fillStyle=g.color; ctx.textAlign='left'; ctx.fillText(fitText(ctx,g.label,W*0.4), pad.l+4, pad.t+12+i*13);
     });
     ctx.textAlign='left';
-    xLabel(c.col? c.col+' / 索引' : '索引');
+    xLabel(c.col? c.col+' / '+t('index') : t('index'));
   }
   else if(kind==='scatter'){
     const sv=await sample(c.dsId,c.col,12000);
     const xa=[...sv.values].filter(v=>!isNaN(v));
-    if(!xa.length){ empty('没有可绘制的数值'); return; }
+    if(!xa.length){ empty(t('no_numeric')); return; }
     const ya=xa.map(v=>v+norm(0,0.3));
     const nx=niceTicks(Math.min(...xa),Math.max(...xa),5), ny=niceTicks(Math.min(...ya),Math.max(...ya),5);
     const sx=v=>pad.l+(v-nx.min)/((nx.max-nx.min)||1)*W;
@@ -1094,7 +1283,7 @@ async function drawChart(cv, c){
     const names=colsOf(ds).filter(cn=>isNumeric(ds.id,cn));
     const {labels,matrix}=await correlationMatrix(ds.id);
     const R=matrix&&matrix.length?matrix:null; const useNames=labels&&labels.length?labels:names;
-    if(!R||!useNames.length){ empty('无可用的数值列进行相关分析'); return; }
+    if(!R||!useNames.length){ empty(t('no_corr')); return; }
     const n=useNames.length;
     const cell=Math.min(W,H)/n, side=cell*n;
     const ox=pad.l+(W-side)/2, oy=pad.t+(H-side)/2;
@@ -1112,7 +1301,7 @@ async function drawChart(cv, c){
   }
   else if(kind==='missing'){
     const names=colsOf(ds);
-    if(!names.length){ empty('没有列可显示'); return; }
+    if(!names.length){ empty(t('no_columns')); return; }
     const bands=50, mr=await missingRates(ds.id);
     const cellW=W/names.length, cellH=H/bands;
     for(let i=0;i<names.length;i++){ const mrate=(mr[names[i]]!==undefined?mr[names[i]]:0)||0;
@@ -1154,7 +1343,7 @@ function startDrag(e,id){
 
 /* ---------- 添加图表 ---------- */
 function addCard(kind, dsId, col, opts={}){
-  const ds=dsById(dsId); const kinds={hist:'直方图',box:'箱线图',violin:'小提琴',ecdf:'ECDF',bar:'条形图',line:'折线图',scatter:'散点图',corr:'相关矩阵',missing:'缺失矩阵'};
+  const ds=dsById(dsId); const kinds={hist:t('histogram'),box:t('box'),violin:t('violin'),ecdf:t('ecdf'),bar:t('bar'),line:t('line'),scatter:t('scatter'),corr:t('corr'),missing:t('missing')};
   const defaults={hist:{bins:40,log:false}, scatter:{density:false}};
   const card={id:'c'+(state.cardSeq++), kind, dsId, col, opts:Object.assign({}, defaults[kind]||{}, opts),
     title: `${kinds[kind]||kind} / ${col}`, order: state.board.length};
@@ -1164,30 +1353,30 @@ function addCard(kind, dsId, col, opts={}){
 function duplicateOverlay(c){
   // 叠加同名列的另一个数据集（跨工作区对比）
   const others=DATASETS.filter(d=>d.id!==c.dsId && colsOf(d).includes(c.col));
-  if(!others.length){ toast('没有其他数据集含同名列 '+c.col); return; }
+  if(!others.length){ toast(t('no_peer_col')+' '+c.col); return; }
   const ds=others[0];
   const overlay = (c.opts.overlay||[]).slice();
   overlay.push({dsId:ds.id, col:c.col, label:ds.file+' / '+c.col});
   c.opts.overlay=overlay;
-  toast('已叠加 '+ds.file+'（'+wsOf(ds).name+'）');
+  toast(t('toast_overlay')+' '+ds.file+'（'+wsOf(ds).name+'）');
   render();
 }
 async function openPicker(){
-  const body=$('#m-body'); $('#m-title').textContent=t('add');
-  let h='<p style="color:var(--text2);font-size:12px;margin-bottom:10px">选择数据集 → 展开列 → 点图表类型。加粗列可叠加多工作区对比。</p>';
+  const body=$('#m-body'); $('#m-title').textContent=t('add_chart');
+  let h='<p style="color:var(--text2);font-size:12px;margin-bottom:10px">'+t('picker_hint')+'</p>';
   for(const ws of WORKSPACES){
     const dss=DATASETS.filter(d=>d.ws===ws.id);
     if(!dss.length)continue;
     h+=`<div class="pick-ds"><div class="pd-head"><span class="dot" style="width:8px;height:8px;border-radius:50%;background:${ws.color}"></span><b>${ws.name}</b></div><div class="pd-cols">`;
     for(const d of dss){
       const profs = await profileAll(d.id);
-      h+=`<div style="font-size:11px;color:var(--text3);margin:4px 0 2px">${d.file} / ${d.rows==='?'?d.size:(fmt(d.rows)+'行')}</div>`;
+      h+=`<div style="font-size:11px;color:var(--text3);margin:4px 0 2px">${d.file} / ${d.rows==='?'?d.size:(fmt(d.rows)+t('rows'))}</div>`;
       for(const cn of colsOf(d)){
         const p=profs[cn]||{type:'category'};
-        const acts = p.type==='category'? [['bar','条形'],['missing','缺失']] : [['hist','直方'],['box','箱线'],['violin','小提琴'],['scatter','散点'],['line','折线'],['ecdf','ECDF']];
+        const acts = p.type==='category'? [['bar',t('bar')],['missing',t('missing')]] : [['hist',t('histogram')],['box',t('box')],['violin',t('violin')],['scatter',t('scatter')],['line',t('line')],['ecdf',t('ecdf')]];
         h+=`<div class="pick-col"><span class="pn">${cn}</span><span class="pt">${p.type}</span>
           ${acts.map(([k,l])=>`<button class="chip" data-pick="${k}" data-ds="${d.id}" data-col="${cn}">${l}</button>`).join('')}
-          <button class="chip" data-pick="corr" data-ds="${d.id}" data-col="${cn}">相关</button></div>`;
+          <button class="chip" data-pick="corr" data-ds="${d.id}" data-col="${cn}">${t('corr')}</button></div>`;
       }
     }
     h+=`</div></div>`;
@@ -1214,7 +1403,7 @@ async function openModel(modelId){
 }
 function closeModel(){ $('#modelview').classList.remove('show'); state.modelMode=null; renderInspector(); }
 function showMvInfo(show){ const el=$('#mv-info'); if(el) el.classList.toggle('show', !!show); const b=$('#mv-info-toggle'); if(b) b.classList.toggle('active', !!show); }
-function mvInfoCloseBtn(){ return `<button class="btn icon" id="mv-info-close" title="关闭信息" style="width:18px;height:18px;padding:0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>`; }
+function mvInfoCloseBtn(){ return `<button class="btn icon" id="mv-info-close" title="${t('close_info')}" style="width:18px;height:18px;padding:0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>`; }
 async function renderLiveModel(m){
   const wrap=$('#mv-svg-wrap'); wrap.innerHTML='';
   let meta={};
@@ -1223,29 +1412,29 @@ async function renderLiveModel(m){
   if(meta.graph && Array.isArray(meta.graph.nodes) && meta.graph.nodes.length){
     const g=normalizeGraph(meta.graph);
     const info={ file:m.file, meta:{
-      '格式': meta.format, '大小': humanSize(meta.size),
+      [t('format')]: meta.format, [t('size')]: humanSize(meta.size),
       'opset': (meta.model?.opset||[]).map(o=>o.version).join(',')||'—',
       'producer': meta.model?.producer||'—',
-      '算子': meta.model?.nodeCount ?? g.nodes.filter(n=>n.kind!=='weight').length,
-      '参数': meta.model?.params ? (meta.model.params>=1e6 ? (meta.model.params/1e6).toFixed(2)+'M' : (meta.model.params/1e3).toFixed(1)+'K') : '—',
-      '输入': (meta.model?.inputs||[]).map(i=>`${i.name} [${i.shape.join('×')}]`).join('，')||'—',
-      '输出': (meta.model?.outputs||[]).map(i=>`${i.name} [${i.shape.join('×')}]`).join('，')||'—',
+      [t('ops')]: meta.model?.nodeCount ?? g.nodes.filter(n=>n.kind!=='weight').length,
+      [t('params')]: meta.model?.params ? (meta.model.params>=1e6 ? (meta.model.params/1e6).toFixed(2)+'M' : (meta.model.params/1e3).toFixed(1)+'K') : '—',
+      [t('input')]: (meta.model?.inputs||[]).map(i=>`${i.name} [${i.shape.join('×')}]`).join('，')||'—',
+      [t('output')]: (meta.model?.outputs||[]).map(i=>`${i.name} [${i.shape.join('×')}]`).join('，')||'—',
     }};
     drawGraph(info, g);
     return;
   }
   $('#mv-info').innerHTML=`<div class="mi-head"><b>${m.file}</b>${mvInfoCloseBtn()}</div>
-    <div class="kv"><span class="k">格式</span><span class="v">${meta.format||m.type}</span></div>
-    <div class="kv"><span class="k">大小</span><span class="v">${humanSize(meta.size||m.size)}</span></div>
-    <div class="kv"><span class="k">修改时间</span><span class="v">${meta.mtime? new Date(meta.mtime).toLocaleString() : '—'}</span></div>
+    <div class="kv"><span class="k">${t('format')}</span><span class="v">${meta.format||m.type}</span></div>
+    <div class="kv"><span class="k">${t('size')}</span><span class="v">${humanSize(meta.size||m.size)}</span></div>
+    <div class="kv"><span class="k">${t('modified')}</span><span class="v">${meta.mtime? new Date(meta.mtime).toLocaleString() : '—'}</span></div>
     <div style="margin-top:10px;padding:10px;border:1px dashed var(--line2);border-radius:6px;color:var(--text2);font-size:12px">
-      无法解析模型结构：${meta.reason||'未知格式'}。当前仅展示元数据。</div>`;
-  const ol=$('#op-legend'); if(ol) ol.innerHTML='<span class="badge">ONNX 元数据模式</span>';
+      ${t('cannot_parse')}：${meta.reason||t('unknown_format')}。</div>`;
+  const ol=$('#op-legend'); if(ol) ol.innerHTML='<span class="badge">'+t('metadata_mode')+'</span>';
   $('#mv-fold').disabled=true;
   $('#mv-search').disabled=true;
   wrap.innerHTML=`<div style="display:grid;place-items:center;height:100%;color:var(--text3)">
     <div style="text-align:center"><div style="font-size:32px;margin-bottom:8px">${svgIcon('box',40)}</div>
-    <div>${meta.reason || '模型结构图不可用'}</div></div></div>`;
+    <div>${meta.reason || t('graph_unavailable')}</div></div></div>`;
 }
 function renderGraph(){
   const m=MODELS.find(x=>x.id===state.modelMode.modelId);
@@ -1372,12 +1561,12 @@ function updateMvInfo(m,g,node){
   if(node){ el.innerHTML=head(node.name)+`
     <div class="kv"><span class="k">op_type</span><span class="v">${node.op}</span></div>
     <div class="kv"><span class="k">shape</span><span class="v">${node.shape?'['+node.shape+']':'?'}</span></div>
-    <div class="kv"><span class="k">输入</span><span class="v">${node.ins.length}</span></div>
-    <div class="kv"><span class="k">输出</span><span class="v">${node.outs.length}</span></div>`; }
+    <div class="kv"><span class="k">${t('input')}</span><span class="v">${node.ins.length}</span></div>
+    <div class="kv"><span class="k">${t('output')}</span><span class="v">${node.outs.length}</span></div>`; }
   else { el.innerHTML=head(m.file)+
     Object.entries(m.meta).map(([k,v])=>`<div class="kv"><span class="k">${k}</span><span class="v">${v}</span></div>`).join('')+
-    `<div class="kv"><span class="k">图节点</span><span class="v">${g.nodes.length}</span></div>
-    <div class="kv"><span class="k">边</span><span class="v">${g.edges.length}</span></div>`; }
+    `<div class="kv"><span class="k">${t('graph_nodes')}</span><span class="v">${g.nodes.length}</span></div>
+    <div class="kv"><span class="k">${t('edges')}</span><span class="v">${g.edges.length}</span></div>`; }
 }
 function renderOpLegend(g){
   const el=$('#op-legend'); if(!el||!g) return;
@@ -1411,7 +1600,7 @@ function renderArchImage(){
   const wrap=$('#mv-svg-wrap'); wrap.innerHTML='';
   const svg=document.createElementNS('http://www.w3.org/2000/svg','svg'); svg.setAttribute('class','graph'); svg.setAttribute('viewBox','0 0 900 260');
   const inner=document.createElementNS('http://www.w3.org/2000/svg','g'); svg.appendChild(inner);
-  const blocks=[['输入图像','224×224×3','#4f8cff'],['Conv7×7','112×112×64','#2dd4a7'],['Pool','56×56×64','#ff9f43'],['ResBlock×3','56×56×256','#a78bfa'],['ResBlock×4','28×28×512','#a78bfa'],['ResBlock×6','14×14×1024','#a78bfa'],['ResBlock×3','7×7×2048','#a78bfa'],['GAP','1×1×2048','#f472b6'],['FC','1×1000','#facc15']];
+  const blocks=[[t('input_image'),'224×224×3','#4f8cff'],['Conv7×7','112×112×64','#2dd4a7'],['Pool','56×56×64','#ff9f43'],['ResBlock×3','56×56×256','#a78bfa'],['ResBlock×4','28×28×512','#a78bfa'],['ResBlock×6','14×14×1024','#a78bfa'],['ResBlock×3','7×7×2048','#a78bfa'],['GAP','1×1×2048','#f472b6'],['FC','1×1000','#facc15']];
   let x=20; const w=86, h=170;
   blocks.forEach(([name,size,c],i)=>{ inner.insertAdjacentHTML('beforeend',`<g>
     <rect x="${x}" y="40" width="${w}" height="${h}" rx="10" fill="${c}" opacity="0.18" stroke="${c}" stroke-width="2"/>
@@ -1422,10 +1611,10 @@ function renderArchImage(){
   inner.insertAdjacentHTML('beforeend',`<defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="var(--line2)"/></marker></defs>`);
   wrap.appendChild(svg);
   $('#mv-info').innerHTML=`<div class="mi-head"><b>arch.png</b>${mvInfoCloseBtn()}</div>
-    <div class="kv"><span class="k">类型</span><span class="v">结构图纸（图片）</span></div>
-    <div class="kv"><span class="k">来源</span><span class="v">draw.io 导出</span></div>
-    <div class="kv"><span class="k">尺寸</span><span class="v">212 KB</span></div>`;
-  const ol2=$('#op-legend'); if(ol2) ol2.innerHTML='<span class="badge">图片画廊模式</span>';
+    <div class="kv"><span class="k">${t('type')}</span><span class="v">${t('arch_type')}</span></div>
+    <div class="kv"><span class="k">${t('source')}</span><span class="v">${t('arch_source')}</span></div>
+    <div class="kv"><span class="k">${t('size')}</span><span class="v">212 KB</span></div>`;
+  const ol2=$('#op-legend'); if(ol2) ol2.innerHTML='<span class="badge">'+t('arch_gallery')+'</span>';
   $('#mv-fold').disabled=true;
 }
 $('#mv-fold').addEventListener('change',()=>{ if(!LIVE && state.modelMode){ const m=MODELS.find(x=>x.id===state.modelMode.modelId); if(m && m.kind==='onnx') renderGraph(); } });
@@ -1434,25 +1623,25 @@ $('#mv-fold').addEventListener('change',()=>{ if(!LIVE && state.modelMode){ cons
 function exportCardPng(c){
   const cardEl=$(`.card[data-card="${c.id}"] canvas`); if(!cardEl)return;
   const a=document.createElement('a'); a.download=(c.title||'chart').replace(/[\\/:*?"<>|]/g,'_')+'.png';
-  a.href=cardEl.toDataURL('image/png'); a.click(); toast('已导出 PNG');
+  a.href=cardEl.toDataURL('image/png'); a.click(); toast(t('toast_png'));
 }
 async function exportBoardMarkdown(){
-  if(!state.board.length){ toast('看板为空'); return; }
-  const lines=['# '+state.title,''];
+  if(!state.board.length){ toast(t('board_empty')); return; }
+  const lines=['# '+(state.title||t('board_default')),''];
   for(const c of state.board){ const ds=dsById(c.dsId); const p=c.col? await profile(c.dsId,c.col):null;
     lines.push(`## ${c.title}`);
-    lines.push(`- 数据源：${ds.file}（${wsOf(ds).name}，${ds.rows==='?'?ds.size:(fmt(ds.rows)+' 行')}）`);
-    if(p && p.type!=='category' && p.mean!==undefined) lines.push(`- 统计：μ ${p.mean.toFixed(3)} / σ ${p.std.toFixed(3)} / P50 ${p.qs.p50.toFixed(3)} / P99 ${p.qs.p99.toFixed(3)} / 缺失 ${pct(p.nulls)}`);
+    lines.push(`- ${t('md_source')}：${ds.file}（${wsOf(ds).name}，${ds.rows==='?'?ds.size:(fmt(ds.rows)+' '+t('rows'))}）`);
+    if(p && p.type!=='category' && p.mean!==undefined) lines.push(`- ${t('md_stat')}：μ ${p.mean.toFixed(3)} / σ ${p.std.toFixed(3)} / P50 ${p.qs.p50.toFixed(3)} / P99 ${p.qs.p99.toFixed(3)} / ${t('md_missing')} ${pct(p.nulls)}`);
     lines.push('');
   }
   const txt=lines.join('\n');
-  (navigator.clipboard? navigator.clipboard.writeText(txt):Promise.reject()).then(()=>toast('Markdown 已复制到剪贴板')).catch(()=>toast('复制失败，见控制台'));
+  (navigator.clipboard? navigator.clipboard.writeText(txt):Promise.reject()).then(()=>toast(t('toast_md'))).catch(()=>toast(t('toast_copy_fail')));
   console.log(txt);
 }
 function exportGraphSvg(){
   const svg=$('#mv-svg-wrap svg'); if(!svg)return;
   const ser=new XMLSerializer().serializeToString(svg);
-  const a=document.createElement('a'); a.download='model-graph.svg'; a.href='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(ser); a.click(); toast('已导出 SVG');
+  const a=document.createElement('a'); a.download='model-graph.svg'; a.href='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(ser); a.click(); toast(t('toast_svg'));
 }
 
 /* ---------- 多看板（标签页） ---------- */
@@ -1463,11 +1652,11 @@ function renderTabs(){
   state.boards.forEach((b,i)=>{
     const tab=document.createElement('span');
     tab.className='board-tab'+(i===state.activeBoard?' active':'');
-    tab.title='双击重命名';
-    const nm=document.createElement('span'); nm.className='tab-name'; nm.textContent=b.title||'未命名看板';
+    tab.title=t('rename_hint');
+    const nm=document.createElement('span'); nm.className='tab-name'; nm.textContent=b.title||t('board_default');
     tab.appendChild(nm);
     if(state.boards.length>1){
-      const x=document.createElement('button'); x.className='tab-close'; x.textContent='×'; x.title='关闭看板';
+      const x=document.createElement('button'); x.className='tab-close'; x.textContent='×'; x.title=t('close_board');
       x.onclick=e=>{ e.stopPropagation(); closeBoard(i); };
       tab.appendChild(x);
     }
@@ -1485,15 +1674,15 @@ function switchBoard(i){
 }
 function addBoard(){
   const id='b'+(Date.now().toString(36));
-  state.boards.push({ id, title:'看板 '+(state.boards.length+1), cards:[] });
+  state.boards.push({ id, title:tf('board_new',{n:state.boards.length+1}), cards:[] });
   switchBoard(state.boards.length-1);
 }
 function renameBoard(i){
-  const b=state.boards[i]; const name=prompt('看板名称', b.title||'');
+  const b=state.boards[i]; const name=prompt(t('rename_board'), b.title||'');
   if(name && name.trim()){ b.title=name.trim(); if(i===state.activeBoard){ state.title=b.title; render(); } else renderTabs(); }
 }
 function closeBoard(i){
-  if(state.boards.length<=1){ toast('至少保留一个看板'); return; }
+  if(state.boards.length<=1){ toast(t('keep_one_board')); return; }
   state.boards.splice(i,1);
   if(state.activeBoard>i) state.activeBoard--;
   else if(state.activeBoard===i) state.activeBoard=Math.min(state.activeBoard, state.boards.length-1);
@@ -1508,15 +1697,15 @@ function saveView(){
   let views=JSON.parse(localStorage.getItem('dp.views')||'{}');
   const key='view_'+Object.keys(views).length;
   views[key]=payload; localStorage.setItem('dp.views',JSON.stringify(views));
-  toast('视图已保存到本地（'+key+'）'); console.log('VIEW',key,payload);
+  toast(tf('toast_saved',{k:key})); console.log('VIEW',key,payload);
 }
 function loadLastView(){ try{ const views=JSON.parse(localStorage.getItem('dp.views')||'{}'); const keys=Object.keys(views); if(keys.length){ const v=views[keys[keys.length-1]];
-    state.boards=(v.boards&&v.boards.length? v.boards : [{id:'b1',title:v.title||'未命名看板',cards:v.board||[]}]).map(b=>({id:b.id,title:b.title,cards:b.cards||[]}));
+    state.boards=(v.boards&&v.boards.length? v.boards : [{id:'b1',title:v.title||t('board_default'),cards:v.board||[]}]).map(b=>({id:b.id,title:b.title,cards:b.cards||[]}));
     state.activeBoard=Math.min(v.active||0, state.boards.length-1);
     const b=curBoard(); state.title=b.title; state.board=b.cards;
     const ids=state.boards.flatMap(x=>x.cards.map(c=>parseInt(String(c.id).slice(1))||0));
     state.cardSeq=Math.max(state.cardSeq, ...ids, 0)+1;
-    toast('已恢复最近视图'); return true; } }catch(e){} return false; }
+    toast(t('toast_restored')); return true; } }catch(e){} return false; }
 
 /* ---------- 杂项 ---------- */
 function toast(msg){ const el=$('#toast'); el.textContent=msg; el.classList.add('show'); clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove('show'),1800); }
@@ -1524,16 +1713,16 @@ function escapeHtml(s){ return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':
 function escapeAttr(s){ return escapeHtml(s); }
 const ICON_MOON='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
 const ICON_SUN='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>';
-function applyTheme(){ document.body.classList.toggle('light', state.theme==='light'); $('#btn-theme').innerHTML = state.theme==='light' ? ICON_MOON : ICON_SUN; $('#btn-theme').title = state.theme==='light' ? '切换到暗色主题' : '切换到亮色主题'; }
+function applyTheme(){ document.body.classList.toggle('light', state.theme==='light'); $('#btn-theme').innerHTML = state.theme==='light' ? ICON_MOON : ICON_SUN; $('#btn-theme').title = t('theme_toggle'); }
 function toggleTheme(){ state.theme = state.theme==='dark'?'light':'dark'; localStorage.setItem('dp.theme',state.theme); applyTheme(); drawBoard(); }
 async function render(){
   renderTree(); await renderBoard(); await renderInspector();
   // ws filter options
   const sel=$('#ws-filter'); const cur=sel.value;
-  sel.innerHTML='<option value="">全部工作区</option>'+WORKSPACES.map(w=>`<option value="${w.id}">${w.name}</option>`).join('');
+  sel.innerHTML='<option value="">'+t('all_workspaces')+'</option>'+WORKSPACES.map(w=>`<option value="${w.id}">${w.name}</option>`).join('');
   sel.value=cur;
   renderTabs();
-  const mb=$('#mode-badge'); if(mb) mb.textContent = LIVE ? ('实时 / '+WORKSPACES.length+' 工作区') : '原型 / 模拟数据';
+  const mb=$('#mode-badge'); if(mb) mb.textContent = LIVE ? tf('live_mode',{n:WORKSPACES.length}) : t('mock_mode');
 }
 function applyWsFilter(){
   const f=$('#ws-filter').value;
@@ -1569,25 +1758,25 @@ function mdToHtml(md){
   closeUl(); closeTable(); return out.join('');
 }
 async function openReport(){
-  if(!LIVE){ toast('原型模式：报告需连接真实数据引擎'); return; }
+  if(!LIVE){ toast(t('proto_mode_report')); return; }
   const paths = DATASETS.map(d=>d.id).filter(p=>typeof p==='string');
-  if(!paths.length){ toast('没有可分析的数据集'); return; }
-  $('#report-title').textContent='数据分析报告';
-  $('#report-body').innerHTML='<p style="color:var(--text2)">正在分析 '+paths.length+' 个数据集…</p>';
+  if(!paths.length){ toast(t('no_datasets')); return; }
+  $('#report-title').textContent=t('report_heading');
+  $('#report-body').innerHTML='<p style="color:var(--text2)">'+tf('generating',{n:paths.length})+'</p>';
   $('#report-modal').classList.add('show');
   try{
     const r = await api('/report', {method:'POST', headers:{'content-type':'application/json'}, body:JSON.stringify({paths})});
     lastReportMd = r.markdown || '';
     $('#report-body').innerHTML = mdToHtml(r.markdown);
     const okN = r.datasets ? r.datasets.filter(d=>!d.error).length : 0;
-    $('#report-title').textContent='数据分析报告 · '+okN+' 个数据集';
+    $('#report-title').textContent=tf('report_ok',{n:okN});
   }catch(e){
-    $('#report-body').innerHTML='<p>生成失败：'+escapeHtml(e.message)+'</p>';
+    $('#report-body').innerHTML='<p>'+t('report_gen_failed')+escapeHtml(e.message)+'</p>';
   }
 }
 function closeReport(){ $('#report-modal').classList.remove('show'); }
 function downloadReport(){
-  if(!lastReportMd){ toast('暂无报告'); return; }
+  if(!lastReportMd){ toast(t('no_report')); return; }
   const blob = new Blob([lastReportMd], {type:'text/markdown;charset=utf-8'});
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'datapilot-report.md'; a.click();
   setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
@@ -1595,17 +1784,259 @@ function downloadReport(){
 async function uploadFiles(fileList){
   const list = [...fileList];
   if(!list.length) return;
-  if(!LIVE){ toast('原型模式：上传需真实插件'); return; }
+  if(!LIVE){ toast(t('proto_mode_upload')); return; }
   let okN = 0;
   for(const f of list){
     try{
       const buf = await f.arrayBuffer();
       const r = await api('/upload?name='+encodeURIComponent(f.name), {method:'POST', body:buf});
       if(r && r.ok) okN++;
-      else toast('上传失败 '+f.name+'：'+((r&&r.error&&r.error.message)||'未知错误'));
-    }catch(e){ toast('上传失败 '+f.name+'：'+e.message); }
+      else toast(t('upload_fail')+' '+f.name+'：'+((r&&r.error&&r.error.message)||t('unknown_error')));
+    }catch(e){ toast(t('upload_fail')+' '+f.name+'：'+e.message); }
   }
-  if(okN){ toast('已上传 '+okN+' 个文件'); await initLive(); await render(); }
+  if(okN){ toast(tf('toast_uploaded',{n:okN})); await initLive(); await render(); }
+}
+
+/* ---------- 模型训练 ---------- */
+const ML_MODELS={linear:{zh:'线性回归',en:'Linear Regression'},logistic:{zh:'逻辑回归',en:'Logistic Regression'},knn:{zh:'K 近邻',en:'K-Nearest Neighbors'},kmeans:{zh:'K-Means 聚类',en:'K-Means Clustering'},pca:{zh:'主成分分析',en:'PCA'},mlp:{zh:'MLP 神经网络',en:'MLP Neural Network'}};
+const ML_TASK_MODELS={regression:['linear','mlp'],classification:['logistic','knn','mlp'],clustering:['kmeans'],reduction:['pca']};
+const ML_PARAM_DEFS={
+  linear:[{k:'lr',tk:'tr_lr',type:'number',def:'0.1',step:'0.01'},{k:'epochs',tk:'tr_epochs',type:'number',def:'300',step:'50'}],
+  logistic:[{k:'lr',tk:'tr_lr',type:'number',def:'0.1',step:'0.01'},{k:'epochs',tk:'tr_epochs',type:'number',def:'300',step:'50'}],
+  knn:[{k:'k',tk:'tr_k',type:'number',def:'5',step:'1'}],
+  kmeans:[{k:'k',tk:'tr_n_clusters_p',type:'number',def:'3',step:'1'}],
+  pca:[{k:'components',tk:'tr_n_components',type:'number',def:'2',step:'1'}],
+  mlp:[{k:'hidden',tk:'tr_hidden',type:'text',def:'64,32'},{k:'epochs',tk:'tr_epochs',type:'number',def:'200',step:'50'},{k:'lr',tk:'tr_lr',type:'number',def:'0.01',step:'0.001'},{k:'activation',tk:'tr_activation',type:'select',def:'relu',opts:['relu','tanh','sigmoid']},{k:'optimizer',tk:'tr_optimizer',type:'select',def:'adam',opts:['adam','sgd']}]
+};
+let trainTask='regression', trainModel='linear';
+function mlab(id){ return ML_MODELS[id] ? (ML_MODELS[id][state.lang]||ML_MODELS[id].zh) : id; }
+function selDataset(){ return $('#tf-dataset').value; }
+
+async function openTrain(){
+  if(!LIVE){ toast(t('proto_mode_upload')); return; }
+  const sel=$('#tf-dataset'); sel.innerHTML='';
+  for(const d of DATASETS){ if(!d || !d.id || typeof d.id!=='string') continue; const o=document.createElement('option'); o.value=d.id; o.textContent=d.file||d.id; sel.appendChild(o); }
+  $('#train-results').innerHTML=''; $('#train-status').textContent=''; $('#train-status').className='';
+  $('#train-modal').classList.add('show');
+  if(sel.value){ try{ await ensureOpen(sel.value); }catch(e){} }
+  setTrainTask('regression');
+}
+function closeTrain(){ $('#train-modal').classList.remove('show'); }
+
+function setTrainTask(task){
+  trainTask=task;
+  document.querySelectorAll('#tf-task .chip').forEach(b=>b.classList.toggle('selected', b.dataset.task===task));
+  const msel=$('#tf-model'); msel.innerHTML='';
+  (ML_TASK_MODELS[task]||[]).forEach(m=>{ const o=document.createElement('option'); o.value=m; o.textContent=mlab(m); msel.appendChild(o); });
+  trainModel=msel.value;
+  updateTrainTargets(); renderTrainParams(); renderTrainFeatures();
+}
+function updateTrainTargets(){
+  const tsel=$('#tf-target'); tsel.innerHTML='';
+  const ds=selDataset(); const cols=ds?colsOf({id:ds}):[];
+  if(trainTask==='clustering'||trainTask==='reduction'){ const o=document.createElement('option'); o.value=''; o.textContent='—'; tsel.appendChild(o); tsel.disabled=true; return; }
+  tsel.disabled=false;
+  let preferred=null;
+  for(const c of cols){
+    const o=document.createElement('option'); o.value=c; o.textContent=c; tsel.appendChild(o);
+    if(!preferred){
+      if(trainTask==='classification' && !isNumeric(ds,c)) preferred=c;
+      else if(trainTask==='regression' && isNumeric(ds,c)) preferred=c;
+    }
+  }
+  if(preferred) tsel.value=preferred;
+}
+function renderTrainFeatures(){
+  const wrap=$('#tf-features'); wrap.innerHTML='';
+  const ds=selDataset(); const cols=ds?colsOf({id:ds}):[];
+  const target=$('#tf-target').value;
+  if(!ds){ wrap.innerHTML='<span style="color:var(--text2)">'+t('tr_no_dataset')+'</span>'; return; }
+  if(!cols.length){ wrap.innerHTML='<span style="color:var(--text2)">'+t('tr_need_open')+'</span>'; return; }
+  let checked=0;
+  for(const c of cols){
+    if(c===target && trainTask!=='clustering' && trainTask!=='reduction') continue;
+    const lab=document.createElement('label'); lab.className='chip';
+    const cb=document.createElement('input'); cb.type='checkbox'; cb.value=c;
+    if(checked<6 && isNumeric(ds,c)){ cb.checked=true; checked++; }
+    lab.appendChild(cb); lab.appendChild(document.createTextNode(' '+c));
+    wrap.appendChild(lab);
+  }
+}
+function renderTrainParams(){
+  const wrap=$('#tf-params'); wrap.innerHTML='';
+  const defs=ML_PARAM_DEFS[trainModel]||[];
+  for(const p of defs){
+    const box=document.createElement('div'); box.style.display='flex'; box.style.flexDirection='column'; box.style.gap='3px'; box.style.minWidth='110px';
+    const lab=document.createElement('label'); lab.textContent=t(p.tk); lab.style.fontSize='11px'; lab.style.color='var(--text2)'; lab.style.margin='0';
+    box.appendChild(lab);
+    if(p.type==='select'){
+      const s=document.createElement('select'); s.dataset.pk=p.k;
+      p.opts.forEach(o=>{ const op=document.createElement('option'); op.value=o; op.textContent=o; if(o===p.def) op.selected=true; s.appendChild(op); });
+      box.appendChild(s);
+    } else {
+      const inp=document.createElement('input'); inp.type=p.type; inp.dataset.pk=p.k; inp.value=p.def; if(p.step) inp.step=p.step;
+      box.appendChild(inp);
+    }
+    wrap.appendChild(box);
+  }
+}
+
+async function runTraining(){
+  const ds=selDataset();
+  if(!ds){ toast(t('tr_no_dataset')); return; }
+  const features=[...document.querySelectorAll('#tf-features input:checked')].map(i=>i.value);
+  const target=$('#tf-target').value;
+  const noTargetTask = (trainTask==='clustering'||trainTask==='reduction');
+  if(!features.length){ toast(t('tr_no_features')); return; }
+  if(!noTargetTask && !target){ toast(t('tr_no_target')); return; }
+  const params={};
+  document.querySelectorAll('#tf-params [data-pk]').forEach(el=>{
+    let v=el.value;
+    if(el.type==='number') v=parseFloat(v);
+    if(el.dataset.pk==='hidden') v=el.value.split(',').map(s=>parseInt(s.trim(),10)).filter(n=>!isNaN(n));
+    params[el.dataset.pk]=v;
+  });
+  const payload={ task:trainTask, model:trainModel, features, testSplit:parseFloat($('#tf-split').value)||0.2, seed:parseInt($('#tf-seed').value,10)||42, params };
+  if(!noTargetTask){ payload.target=target; payload.targetKind = isNumeric(ds,target)?'numeric':'categorical'; }
+  const st=$('#train-status'); st.className=''; st.textContent=t('tr_training');
+  $('#train-results').innerHTML='';
+  try{
+    const backendId = await ensureOpen(ds);
+    const j = await api('/ml/train', {method:'POST', headers:{'content-type':'application/json'}, body:JSON.stringify(Object.assign({datasetId:backendId}, payload))});
+    renderTrainResults(j);
+    st.textContent=tf('tr_done',{ms:j.durationMs||0});
+  }catch(e){
+    st.className='err'; st.textContent=t('tr_failed')+e.message;
+  }
+}
+
+function trPanel(title, el){ const p=document.createElement('div'); p.className='tr-panel'; const h=document.createElement('h4'); h.textContent=title; p.appendChild(h); if(el) p.appendChild(el); return p; }
+function trNote(txt){ const p=document.createElement('p'); p.style.color='var(--text2)'; p.style.fontSize='12px'; p.textContent=txt; return p; }
+function makeCanvas(w,h){ const c=document.createElement('canvas'); c.width=w; c.height=h; c.style.width='100%'; return c; }
+function trAxis(ctx,w,h,pad,xMin,xMax,yMin,yMax,xFmt,yFmt){
+  ctx.strokeStyle='var(--line)'; ctx.fillStyle='var(--text2)'; ctx.font='10px '+SANS_STACK;
+  const yt=niceTicks(yMin,yMax,5).ticks; const xt=niceTicks(xMin,xMax,5).ticks;
+  ctx.lineWidth=1; ctx.textAlign='right'; ctx.textBaseline='middle';
+  for(const t of yt){ const y=h-pad.b-(t-yMin)/(yMax-yMin||1)*(h-pad.t-pad.b); ctx.beginPath(); ctx.moveTo(pad.l,y); ctx.lineTo(w-pad.r,y); ctx.stroke(); ctx.fillText(yFmt?yFmt(t):fmtTick(t), pad.l-5, y); }
+  ctx.textAlign='center'; ctx.textBaseline='top';
+  for(const t of xt){ const x=pad.l+(t-xMin)/(xMax-xMin||1)*(w-pad.l-pad.r); ctx.beginPath(); ctx.moveTo(x,h-pad.b); ctx.lineTo(x,h-pad.b+3); ctx.stroke(); ctx.fillText(xFmt?xFmt(t):fmtTick(t), x, h-pad.b+6); }
+}
+function drawLineChart(values, color){
+  const c=makeCanvas(560,240); const ctx=c.getContext('2d'); const w=c.width,h=c.height,pad={l:44,r:14,t:16,b:26};
+  const mn=Math.min(...values), mx=Math.max(...values); const span=(mx-mn)||1;
+  ctx.fillStyle='var(--bg)'; ctx.fillRect(0,0,w,h);
+  trAxis(ctx,w,h,pad,0,values.length-1,mn-0.05*span,mx+0.05*span);
+  ctx.strokeStyle=color; ctx.lineWidth=1.6; ctx.beginPath();
+  values.forEach((v,i)=>{ const x=pad.l+i/(values.length-1)*(w-pad.l-pad.r); const y=h-pad.b-(v-(mn-0.05*span))/((mx-mn+0.1*span)||1)*(h-pad.t-pad.b); i?ctx.lineTo(x,y):ctx.moveTo(x,y); });
+  ctx.stroke();
+  return c;
+}
+function drawScatter(canvas, pts, labels){
+  const ctx=canvas.getContext('2d'); const w=canvas.width,h=canvas.height,pad={l:44,r:14,t:16,b:30};
+  const xs=pts.map(p=>p[0]), ys=pts.map(p=>p[1]);
+  const xMin=Math.min(...xs), xMax=Math.max(...xs), yMin=Math.min(...ys), yMax=Math.max(...ys);
+  const sx=xMax-xMin||1, sy=yMax-yMin||1;
+  ctx.fillStyle='var(--bg)'; ctx.fillRect(0,0,w,h);
+  trAxis(ctx,w,h,pad,xMin-0.05*sx,xMax+0.05*sx,yMin-0.05*sy,yMax+0.05*sy);
+  const pal=['#4f8cff','#ff9f43','#2dd4a7','#f85149','#a78bfa','#e3b341','#56d4dd','#f778ba'];
+  pts.forEach((p,i)=>{
+    const x=pad.l+(p[0]-(xMin-0.05*sx))/(sx*1.1)*(w-pad.l-pad.r); const y=h-pad.b-(p[1]-(yMin-0.05*sy))/(sy*1.1)*(h-pad.t-pad.b);
+    const l=labels?labels[i]:0; ctx.fillStyle=pal[(l%pal.length+pal.length)%pal.length];
+    ctx.beginPath(); ctx.arc(x,y,2.5,0,Math.PI*2); ctx.fill();
+  });
+  return canvas;
+}
+function drawConfusionTable(matrix, labels){
+  const tbl=document.createElement('table'); tbl.className='cm-table';
+  const hr=document.createElement('tr'); const th0=document.createElement('th'); th0.textContent=''; hr.appendChild(th0);
+  labels.forEach(l=>{ const th=document.createElement('th'); th.textContent=l; hr.appendChild(th); }); tbl.appendChild(hr);
+  matrix.forEach((row,i)=>{
+    const tr=document.createElement('tr'); const td0=document.createElement('th'); td0.textContent=labels[i]; tr.appendChild(td0);
+    row.forEach((v,j)=>{ const td=document.createElement('td'); if(i===j) td.className='diag'; td.textContent=v; tr.appendChild(td); });
+    tbl.appendChild(tr);
+  });
+  return tbl;
+}
+function drawMlpFlow(layers){
+  const wrap=document.createElement('div'); wrap.className='mlp-flow';
+  layers.forEach((L,i)=>{
+    if(i>0){ const a=document.createElement('span'); a.className='arr'; a.textContent='→'; wrap.appendChild(a); }
+    const box=document.createElement('div'); box.className='lbox';
+    const ls=document.createElement('div'); ls.className='ls'; ls.textContent=L.name; box.appendChild(ls);
+    const ln=document.createElement('div'); ln.className='ln'; ln.textContent=(L.shape&&L.shape.join('×'))||''; box.appendChild(ln);
+    wrap.appendChild(box);
+  });
+  return wrap;
+}
+
+function renderTrainResults(r){
+  const box=$('#train-results'); box.innerHTML='';
+  const m=r.metrics||{};
+  const entries=[];
+  if(r.task==='regression'){ entries.push(['metric_r2',m.r2],['metric_rmse',m.rmse],['metric_mae',m.mae]); }
+  else if(r.task==='classification'){ entries.push(['metric_accuracy',m.accuracy],['metric_precision',m.precision],['metric_recall',m.recall],['metric_f1',m.f1]); }
+  else if(r.task==='clustering'){ entries.push(['metric_inertia',m.inertia],['metric_silhouette',m.silhouette],['tr_n_clusters',(r.summary&&r.summary.nClusters)||r.predictions.clusterCount]); }
+  else { entries.push(['metric_evr', m.explainedVarianceRatio ? m.explainedVarianceRatio.map(v=>v.toFixed(3)).join(', ') : '']); }
+  const mcards=document.createElement('div'); mcards.className='metric-cards';
+  for(const [tk,val] of entries){
+    const card=document.createElement('div'); card.className='metric-card';
+    const vd=document.createElement('div'); vd.className='mv';
+    vd.textContent = (typeof val==='number') ? (Math.abs(val)<1&&val!==0 ? val.toFixed(4) : val.toFixed(2)) : String(val);
+    const ld=document.createElement('div'); ld.className='ml'; ld.textContent=t(tk);
+    card.appendChild(vd); card.appendChild(ld); mcards.appendChild(card);
+  }
+  box.appendChild(mcards);
+
+  if(r.history && r.history.length>1){
+    const grid=document.createElement('div'); grid.className='tr-grid';
+    grid.appendChild(trPanel(t('tr_loss_curve'), drawLineChart(r.history.map(h=>h.loss), '#4f8cff')));
+    if(r.history[0] && r.history[0].gradNorm!==undefined) grid.appendChild(trPanel(t('tr_grad_curve'), drawLineChart(r.history.map(h=>h.gradNorm), '#ff9f43')));
+    box.appendChild(grid);
+  }
+
+  const viz=r.viz||{};
+  if(r.task==='regression' && viz.points && viz.points.length){
+    const c=drawScatter(makeCanvas(560,280), viz.points); box.appendChild(trPanel(t('tr_regress_scatter'), c));
+  }
+  if(r.task==='classification'){
+    if(r.confusion && r.confusion.matrix) box.appendChild(trPanel(t('tr_confusion'), drawConfusionTable(r.confusion.matrix, r.confusion.labels||[])));
+    if(viz.points && viz.points.length) box.appendChild(trPanel(t('tr_regress_scatter'), drawScatter(makeCanvas(560,280), viz.points, viz.pointLabels)));
+    if(viz.boundary && viz.boundary.grid) box.appendChild(trPanel(t('tr_boundary'), drawBoundary(viz)));
+  }
+  if(r.task==='clustering' && viz.points){
+    const c=drawScatter(makeCanvas(560,280), viz.points, viz.pointLabels); box.appendChild(trPanel(t('tr_cluster_scatter'), c));
+  }
+  if(r.task==='reduction' && viz.projections){
+    const c=drawScatter(makeCanvas(560,280), viz.projections, viz.pointLabels); box.appendChild(trPanel(t('tr_pca_plot'), c));
+  }
+  if(r.summary && r.summary.layers && r.summary.layers.length){
+    box.appendChild(trPanel(t('tr_mlp_flow'), drawMlpFlow(r.summary.layers)));
+  }
+}
+function drawBoundary(viz){
+  const b=viz.boundary; const res=b.xs.length;
+  const c=makeCanvas(560,320); const ctx=c.getContext('2d'); const w=c.width,h=c.height;
+  const pad={l:44,r:14,t:16,b:30};
+  const xMin=b.xs[0], xMax=b.xs[res-1], yMin=b.ys[0], yMax=b.ys[res-1];
+  const pal=['#4f8cff','#ff9f43','#2dd4a7','#f85149','#a78bfa','#e3b341','#56d4dd','#f778ba'];
+  const pw=w-pad.l-pad.r, ph=h-pad.t-pad.b;
+  const cellW=pw/res, cellH=ph/res;
+  ctx.fillStyle='var(--bg)'; ctx.fillRect(0,0,w,h);
+  for(let r=0;r<res;r++){
+    for(let cc=0;cc<res;cc++){
+      const L=b.grid[r][cc]; ctx.fillStyle=pal[(L%pal.length+pal.length)%pal.length]; ctx.globalAlpha=0.5;
+      ctx.fillRect(pad.l+cc*cellW, pad.t+(res-1-r)*cellH, cellW+0.6, cellH+0.6);
+    }
+  }
+  ctx.globalAlpha=1;
+  trAxis(ctx,w,h,pad,xMin,xMax,yMin,yMax);
+  const pts=viz.points||[]; const labels=viz.pointLabels||[];
+  pts.forEach((p,i)=>{
+    const x=pad.l+(p[0]-xMin)/((xMax-xMin)||1)*pw; const y=pad.t+ph-(p[1]-yMin)/((yMax-yMin)||1)*ph;
+    const L=labels[i]||0; ctx.fillStyle=pal[(L%pal.length+pal.length)%pal.length];
+    ctx.beginPath(); ctx.arc(x,y,3,0,Math.PI*2); ctx.fill(); ctx.strokeStyle='rgba(0,0,0,.45)'; ctx.lineWidth=1; ctx.stroke();
+  });
+  return c;
 }
 
 /* ---------- 事件绑定 ---------- */
@@ -1619,18 +2050,18 @@ function bind(){
   $('#tree-filter').addEventListener('input',()=>renderTree());
   $('#ws-filter').addEventListener('change',applyWsFilter);
   $('#btn-add-root').onclick=async ()=>{
-    const path = prompt('输入要挂载的目录绝对路径（例如 D:\\data）','');
+    const path = prompt(t('prompt_root'),'');
     if(!path || !path.trim()) return;
-    if(!LIVE){ toast('原型模式：目录选择器将在真实插件中调用'); return; }
+    if(!LIVE){ toast(t('proto_mode_root')); return; }
     try{
       const r = await api('/roots/add', {method:'POST', body:{path:path.trim()}});
-      if(r && r.ok){ toast('已添加根目录'); await initLive(); await render(); }
-      else toast('添加失败：'+(r&&r.error&&r.error.message||'未知错误'));
-    }catch(e){ toast('添加失败：'+e.message); }
+      if(r && r.ok){ toast(t('toast_add_root')); await initLive(); await render(); }
+      else toast(t('toast_add_fail')+(r&&r.error&&r.error.message||t('unknown_error')));
+    }catch(e){ toast(t('toast_add_fail')+e.message); }
   };
   $('#btn-rescan').onclick=async ()=>{
-    if(!LIVE){ toast('已重新扫描（模拟）'); renderTree(); return; }
-    toast('正在扫描…'); await initLive(); await render(); toast('扫描完成');
+    if(!LIVE){ toast(t('rescan_mock')); renderTree(); return; }
+    toast(t('rescanning')); await initLive(); await render(); toast(t('rescan_done'));
   };
   $('#cols-select').addEventListener('change',()=>renderBoard());
   $('#btn-add-chart').onclick=openPicker; $('#btn-empty-add').onclick=openPicker;
@@ -1638,15 +2069,24 @@ function bind(){
   $('#btn-new-board').onclick=addBoard;
   $('#btn-md').onclick=exportBoardMarkdown;
   $('#btn-theme').onclick=toggleTheme;
-  $('#btn-lang').onclick=()=>{ state.lang=state.lang==='zh'?'en':'zh'; $('#btn-lang').textContent=state.lang==='zh'?'EN':'中'; render(); };
-  $('#btn-settings').onclick=()=>toast('设置：限额 / 采样 / 缓存（见 PRD §FR-10）');
+  $('#btn-lang').onclick=()=>{ state.lang=state.lang==='zh'?'en':'zh'; localStorage.setItem('dp.lang', state.lang); applyStaticLang(); render(); };
+  $('#btn-settings').onclick=()=>toast(t('settings_toast'));
   $('#btn-upload').onclick=()=>$('#file-input').click();
   $('#file-input').addEventListener('change',e=>{ uploadFiles(e.target.files); e.target.value=''; });
   $('#btn-report').onclick=openReport;
   $('#report-close').onclick=closeReport;
-  $('#report-copy').onclick=()=>{ if(lastReportMd){ navigator.clipboard.writeText(lastReportMd).then(()=>toast('已复制 Markdown'),()=>toast('复制失败')); } else toast('暂无报告'); };
+  $('#report-copy').onclick=()=>{ if(lastReportMd){ navigator.clipboard.writeText(lastReportMd).then(()=>toast(t('copy_ok')),()=>toast(t('copy_fail'))); } else toast(t('no_report')); };
   $('#report-download').onclick=downloadReport;
   $('#report-modal').addEventListener('click',e=>{ if(e.target.id==='report-modal')closeReport(); });
+  // 模型训练
+  $('#btn-train').onclick=openTrain;
+  $('#train-close').onclick=closeTrain;
+  $('#train-modal').addEventListener('click',e=>{ if(e.target.id==='train-modal')closeTrain(); });
+  $('#tf-task').addEventListener('click',e=>{ const b=e.target.closest('.chip'); if(b) setTrainTask(b.dataset.task); });
+  $('#tf-model').addEventListener('change',e=>{ trainModel=e.target.value; renderTrainParams(); });
+  $('#tf-dataset').addEventListener('change',async()=>{ const v=selDataset(); if(v){ try{ await ensureOpen(v); }catch(e){} } updateTrainTargets(); renderTrainFeatures(); });
+  $('#tf-target').addEventListener('change',renderTrainFeatures);
+  $('#tf-run').onclick=runTraining;
   $('#m-close').onclick=closeModal; $('#m-cancel').onclick=closeModal;
   $('#modal').addEventListener('click',e=>{ if(e.target.id==='modal')closeModal(); });
   $('#mv-back').onclick=closeModel;
@@ -1666,6 +2106,7 @@ function bind(){
 /* ---------- 启动 ---------- */
 async function boot(){
   applyTheme();
+  applyStaticLang();
   bind();
   await initLive();
   if(!LIVE){
