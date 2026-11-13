@@ -1,90 +1,80 @@
-# dsh-datapilot · DataPilot 数据工作台
+# DataPilot · 数据工作台
 
-在 DSH 侧边栏常驻一个数据分析面板：查看**多工作区 × 多数据集**的分析图表、
-数据分布，以及**深度学习模型结构图**（ONNX / 架构图）。
+> 在 DeepSeek Harness 侧边栏常驻一个**数据分析 + 机器学习工作台**：跨多个工作区查看本地数据集的图表、数据分布、模型结构图，还能直接在面板里训练经典机器学习模型。
 
-## 当前能力
+<p align="center">
+  <a href="https://www.npmjs.com/package/dsh-datapilot"><img src="https://img.shields.io/npm/v/dsh-datapilot" alt="npm version"></a>
+  <a href="https://github.com/xiduo-wang/dsh-datapilot/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="license"></a>
+  <a href="https://www.npmjs.com/package/dsh-datapilot"><img src="https://img.shields.io/npm/dt/dsh-datapilot" alt="downloads"></a>
+</p>
 
-- **client 半面**（`lib/client.js`）：注册 `sidebar.panellist` 图标 + `main` 面板
-  body，body 是一个 iframe，指向 host 半面服务的面板 HTML。
-- **host 半面**（`lib/host/index.js`）：22 条路由，服务面板 HTML + 数据引擎 API +
-  ML 训练 API（全部 loopback-only，见下）。
-- **数据引擎**（`lib/host/engine.js` + `lib/host/parsers.js`）：
-  - CSV / TSV / TXT：全量解析
-  - JSONL / NDJSON / JSON：JSON 支持对象数组、`{data|rows|records|items}` 包裹、列式对象、单对象
-  - Parquet / Parquet2：`hyparquet` + `hyparquet-compressors`（snappy/zstd/gzip）
-  - Excel `.xlsx / .xlsm`：内置 ZIP + SpreadsheetML 解析，多工作表、日期/布尔/共享字符串
-  - 旧版 `.xls`（BIFF8/OLE，Excel 97-2003）：SheetJS `xlsx`（可选依赖，多工作表、日期/布尔）
-  - ONNX：内置 protobuf wire 解析模型图（节点/边/算子/参数/输入输出/opset）
-- **面板**（`assets/panel.html`）：自包含单文件（Canvas 图表 + SVG 模型图），
-  通过 `/api/dsh-datapilot/*` 读取真实数据（mock 数据仅作 API 不可用时的降级）。
-- **机器学习/深度学习训练**（`lib/host/ml/`，纯 JS 零依赖，worker 线程训练）：
-  线性回归、逻辑回归、KNN、K-Means、PCA、MLP 六类模型，支持回归/分类/聚类/降维
-  四类任务，产出指标卡、loss/梯度范数曲线、混淆矩阵、散点/决策边界、MLP 数据流图。
+## ✨ 功能特性
 
-## 数据引擎路由（host 半面，`/api/dsh-datapilot/*`）
+- **多工作区 × 多数据集**：挂载多个本地目录，在一个面板里同时浏览、切换不同工作区的数据。
+- **9 类交互图表**：直方图、箱线图、小提琴图、ECDF、条形图、折线图、散点图、相关矩阵、缺失矩阵，全部 Canvas 自绘、零依赖。
+- **数据画像**：点开数据集即见每列的统计量（均值/标准差/分位数）、基数、缺失率、离群值。
+- **多格式数据源**：CSV / TSV / JSON / JSONL / Parquet / Excel（.xlsx / .xlsm / .xls 多工作表）/ ONNX。
+- **深度学习模型结构图**：ONNX 模型一键展开成可缩放、可折叠的算子图，标注输入输出维度与参数量。
+- **上传 + 跨工作区协作**：上传本地文件到共享数据池，多个工作区之间复用。
+- **结构化分析报告**：一键生成 Markdown 数据分析报告（洞察、列画像、相关矩阵）。
+- **内置机器学习/深度学习训练**：线性回归、逻辑回归、KNN、K-Means、PCA、MLP，产出指标卡、损失/梯度曲线、混淆矩阵、决策边界、MLP 数据流图。
+- **多标签页看板 + 中英文切换**：像浏览器一样多开看板，界面中英文即时切换。
 
-`panel`（GET，HTML）、`health`、`state`、`roots/add`（POST）、`roots/remove`（POST）、
-`scan`（?rootId）、`datasets/open`（POST body `{path,parse:{sheet}}`）、`datasets/schema`、
-`datasets/preview`（?id&offset&limit）、`datasets/profile`（?id&columns）、
-`datasets/histogram`（?id&column&bins）、`datasets/quantiles`（?id&column&qs）、
-`datasets/correlation`（?id）、`datasets/groupby`（?id&by&metric&agg&topK）、
-`datasets/sample`（?id&column&n）、`datasets/close`（POST）、`models/meta`（?path）、
-`upload`（POST 原始体 + ?name，写入 `~/.dsh/dsh-datapilot/uploads`）、
-`report`（POST body `{paths}`，生成结构化 Markdown 分析报告）、
-`ml/capabilities`（GET，模型能力清单）、
-`ml/train`（POST body `{datasetId,task,model,features,target,params,...}`，worker 线程训练）、
-`diagnostics`。
+## 🚀 快速开始
 
-统一响应 `{ok:true,...data}` / `{ok:false,error:{code,message}}`；仅接受本机回环
-请求；数据根目录用 realpath 前缀校验防目录穿越；数据集状态持久化到
-`~/.dsh/dsh-datapilot/state.json`，内存注册表上限 8 个（LRU 逐出）。
-
-资源上限（`lib/host/engine.js` 的 `LIMITS`）：单个文件 **1 GiB**、单个数据集
-**500 万行**（超过行数截断并给出 warning；超过字节数返回 `TOO_LARGE`）。
-
-## 安装（本地目录加载）
+在 DSH 的插件市场（社区市场 → Tools & Capabilities）搜索 **DataPilot** 安装，或在终端执行：
 
 ```bash
-dsh plugin --profile desktop add file:./dsh-datapilot
+dsh plugin add dsh-datapilot
 ```
 
-或手动注册（无 dsh CLI 时）：
+也可以直接 npm 安装后手动注册：
 
-1. 把本包放入 profile 的 `node_modules/dsh-datapilot`。
-2. 在 profile `package.json` 的 `dependencies` 加 `"dsh-datapilot": "0.1.0"`，
-   并在 `dsh.profile.bundles` 数组追加 `"dsh-datapilot"`。
-3. 重启 DSH。
+```bash
+npm install dsh-datapilot
+```
 
-## 架构
+重启 DSH，左侧全局面板就会出现「DataPilot 数据工作台」。
 
-- 双面插件：`exports "."` 跑 host（node），`exports "./client"` 跑 web GUI。
-- `cordis.patch.yml`：`- insert: { id: datapilot, name: dsh-datapilot }`。
-- client bundle 用 `window.__ModuleLoader__.load` 外壳 + 运行时 `require("react")`，
-  无需本地 tsdown 构建。
+## 📖 使用
 
-## 路线图
+1. 打开侧边栏的 **DataPilot 数据工作台**。
+2. 点顶栏「根目录」挂载一个本地数据目录（或点「上传」传文件）。
+3. 左侧树里点一个数据集 → 右侧检查器显示列画像。
+4. 点任意列的类型徽章（直方图 / 箱线 / 散点 …）→ 看板生成图表。
+5. 点「训练」→ 选数据集、任务、模型 → 一键训练并看指标与曲线。
+6. 点「报告」→ 生成结构化 Markdown 分析报告。
 
-- ✅ 数据引擎：CSV/TSV/JSONL/JSON/Parquet/xlsx/`.xls`/ONNX 解析、列画像、图表数据路由。
-- ✅ 面板从「模拟数据」切换到真实数据引擎 API（mock 作为降级）。
-- ✅ 上传本地数据集 + 跨工作区数据池 + 结构化分析报告（本地规则式洞察）。
-- ✅ 多格式适配：JSON、Parquet、xlsx/`.xls` 多工作表、ONNX 结构图。
-- ✅ 解析移入 Worker 线程（多核并行，大文件不阻塞）。
-- ✅ 多看板标签页 + 图表刻度/网格/去斜体标签。
-- ✅ 内置机器学习/深度学习训练（线性回归/逻辑回归/KNN/K-Means/PCA/MLP + 指标/损失/梯度/混淆矩阵/决策边界/MLP 数据流）。
-- ⏳ 决策树 / 随机森林 / SVM（Phase 2）。
-- ⏳ Arrow/IPC、HDF5、NumPy、SPSS/Stata/SAS、SQLite。
-- ⏳ 视图书签持久化（live 模式刷新后看板清空）。
-- ⏳ ONNX 模型推理（GPU/WebGPU 加速，独立功能）。
+## 🧩 支持的数据格式
 
-## 发布与上架
+| 格式 | 说明 |
+| --- | --- |
+| CSV / TSV / TXT | 全量解析，自动类型推断 |
+| JSON / JSONL / NDJSON | 对象数组、列式、`{data/rows/records}` 包裹 |
+| Parquet | `hyparquet` 解析（snappy / zstd / gzip） |
+| Excel `.xlsx / .xlsm` | 内置 ZIP + SpreadsheetML 解析，多工作表、日期/布尔 |
+| Excel `.xls`（97-2003） | SheetJS `xlsx`，多工作表、日期/布尔 |
+| ONNX | 模型结构图（算子/边/参数/输入输出/opset） |
 
-1. **npm**：`npm publish`（先 `npm login`）。
-2. **GitHub 开源**：`git init && git remote add origin https://github.com/xiduo-wang/dsh-datapilot.git && git push -u origin main`。
-3. **插件市场**：向 `awesome-dsh-plugin/awesome-dsh-plugin` 仓库提 PR，提交一条
-   `RegistryPlugin` 目录条目（格式见 `marketplace/catalog-entry.json`）。
-4. 目录被合并后，插件即出现在 DSH 社区市场的「Tools & Capabilities」分类下。
+> 单文件上限 1 GiB、单数据集 500 万行，超过自动截断并提示。
 
-## 许可证
+## 🤖 内置机器学习模型
 
-MIT © 2026 xiduo-wang
+| 任务 | 模型 | 产出 |
+| --- | --- | --- |
+| 回归 | 线性回归、MLP | R² / MSE / RMSE / MAE + 损失/梯度曲线 + 预测散点 |
+| 分类 | 逻辑回归、KNN、MLP | 准确率 / 精确率 / 召回率 / F1 + 混淆矩阵 + 决策边界 |
+| 聚类 | K-Means | 惯性 / 轮廓系数 + 聚类散点 |
+| 降维 | PCA | 解释方差比 + 投影散点 |
+
+训练在 Worker 线程执行，不阻塞主线程；预处理自动做 z-score 标准化、类别特征 one-hot、缺失值处理。
+
+## 🏗️ 技术栈
+
+- 纯 JavaScript，零前端依赖（图表 Canvas 自绘、模型图 SVG 自绘）。
+- 双面插件：host 半面（Node 数据引擎 + ML 训练，Worker 线程）+ client 半面（web 面板）。
+- 数据解析：内置 CSV/JSONL/Excel/ONNX protobuf 解析器 + `hyparquet` + SheetJS。
+
+## 📄 许可证
+
+[MIT](./LICENSE) © 2026 xiduo-wang
