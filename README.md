@@ -69,11 +69,6 @@ npm install dsh-datapilot
 
 训练在 Worker 线程执行，不阻塞主线程；预处理自动做 z-score 标准化、类别特征 one-hot、缺失值处理。
 
-## 🏗️ 技术栈
-
-- 纯 JavaScript，零前端依赖（图表 Canvas 自绘、模型图 SVG 自绘）。
-- 双面插件：host 半面（Node 数据引擎 + ML 训练，Worker 线程）+ client 半面（web 面板）。
-- 数据解析：内置 CSV/JSONL/Excel/ONNX protobuf 解析器 + `hyparquet` + SheetJS。
 
 ## 📄 许可证
 
