@@ -1,0 +1,12 @@
+# dsh-datapilot bundle patch：把本插件（双面插件）插入 profile 的 cordis 编排表。
+# node 侧（exports "."）跑在 host 进程：服务 DataPilot 面板 HTML + /api 路由族；
+# 浏览器侧（exports "./client"，由 package.json 的 dsh.client 声明）加载进
+# web GUI 的侧边栏面板（sidebar.panellist 图标 + main 面板 body）。
+#
+# 安装（本地目录加载，pnpm 语义）：
+#   dsh plugin --profile desktop add file:./dsh-datapilot
+#
+# 本行只按包名注册一个裸插件行；客户端半面由 package.json 的 dsh.client 字段自动发现。
+- insert:
+    - id: datapilot
+      name: 'dsh-datapilot'
