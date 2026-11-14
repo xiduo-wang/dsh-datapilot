@@ -1,7 +1,7 @@
 {
   "name": "dsh-datapilot",
   "description": "DataPilot 数据工作台：在 DSH 侧边栏常驻一个数据分析面板，查看多工作区、多数据集的分析图表、数据分布与深度学习模型结构图。",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "packageManager": "pnpm@11.21.0",
   "engines": {
