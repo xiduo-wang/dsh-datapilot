@@ -744,7 +744,7 @@ const I18N = {
     toast_png:'已导出 PNG', toast_svg:'已导出 SVG', toast_md:'Markdown 已复制到剪贴板',
     toast_copy_fail:'复制失败，见控制台', board_empty:'看板为空', keep_one_board:'至少保留一个看板',
     rename_board:'看板名称', board_default:'未命名看板', board_new:'看板 {n}', close_board:'关闭看板',
-    copy_ok:'已复制 Markdown', copy_fail:'复制失败', no_peer_col:'没有其他数据集含同名列', toast_overlay:'已叠加',
+    copy_ok:'已复制 Markdown', copy_fail:'复制失败', no_peer_col:'没有其他数据集含同名列', toast_overlay:'已叠加', toast_dup:'已复制图表', loading:'加载中…', too_big_auto:'文件较大，点左侧数据集名后再出图',
     settings_toast:'设置：限额 / 采样 / 缓存（见 PRD §FR-10）', sheet_fail:'切换工作表失败：', unknown_error:'未知错误',
     no_numeric:'该列没有可绘制的数值', no_data:'该列没有数据', bar_need_cat:'条形图需要类别列',
     no_corr:'无可用的数值列进行相关分析', no_columns:'没有列可显示', index:'索引',
@@ -801,7 +801,7 @@ const I18N = {
     toast_png:'PNG exported', toast_svg:'SVG exported', toast_md:'Markdown copied to clipboard',
     toast_copy_fail:'Copy failed, see console', board_empty:'Board is empty', keep_one_board:'Keep at least one board',
     rename_board:'Board name', board_default:'Untitled board', board_new:'Board {n}', close_board:'Close board',
-    copy_ok:'Markdown copied', copy_fail:'Copy failed', no_peer_col:'No other dataset has a same-named column', toast_overlay:'Overlay added',
+    copy_ok:'Markdown copied', copy_fail:'Copy failed', no_peer_col:'No other dataset has a same-named column', toast_overlay:'Overlay added', toast_dup:'Chart duplicated', loading:'Loading…', too_big_auto:'Large file — open it from the tree first',
     settings_toast:'Settings: limits / sampling / cache (see PRD §FR-10)', sheet_fail:'Sheet switch failed: ', unknown_error:'Unknown error',
     no_numeric:'No plottable numeric values in this column', no_data:'No data in this column', bar_need_cat:'Bar chart needs a categorical column',
     no_corr:'No numeric columns available for correlation', no_columns:'No columns to display', index:'index',
@@ -976,9 +976,9 @@ function renderCardInspector(el, c){
   $('#card-bins')?.addEventListener('input',e=>{ c.opts.bins=+e.target.value; drawBoard(); });
   $('#card-log')?.addEventListener('change',e=>{ c.opts.log=e.target.checked; drawBoard(); });
   $('#card-density')?.addEventListener('change',e=>{ c.opts.density=e.target.checked; drawBoard(); });
-  $('#card-dup').onclick=()=>duplicateOverlay(c);
+  $('#card-dup').onclick=()=>duplicateCard(c);
   $('#card-export').onclick=()=>exportCardPng(c);
-  $('#card-del').onclick=()=>{ state.board=state.board.filter(x=>x.id!==c.id); state.selCard=null; render(); };
+  $('#card-del').onclick=()=>deleteCard(c.id);
 }
 function renderModelInspector(el){
   const m=MODELS.find(x=>x.id===state.modelMode.modelId);
@@ -1026,9 +1026,9 @@ async function renderBoard(){
     const id=card.dataset.card;
     card.querySelector('.c-head').addEventListener('mousedown',e=>startDrag(e,id));
     card.addEventListener('click',e=>{ if(e.target.closest('button'))return; state.selCard=id; state.selDs=null; renderInspector(); $$('.card').forEach(x=>x.classList.toggle('selected',x.dataset.card===id)); });
-    card.querySelector('[data-act=dup]').onclick=e=>{e.stopPropagation(); duplicateOverlay(state.board.find(x=>x.id===id));};
+    card.querySelector('[data-act=dup]').onclick=e=>{e.stopPropagation(); duplicateCard(state.board.find(x=>x.id===id));};
     card.querySelector('[data-act=png]').onclick=e=>{e.stopPropagation(); exportCardPng(state.board.find(x=>x.id===id));};
-    card.querySelector('[data-act=del]').onclick=e=>{e.stopPropagation(); state.board=state.board.filter(x=>x.id!==id); if(state.selCard===id)state.selCard=null; render();};
+    card.querySelector('[data-act=del]').onclick=e=>{e.stopPropagation(); deleteCard(id);};
   });
   await drawBoard();
 }
@@ -1322,7 +1322,9 @@ function hex(h){h=h.replace('#',''); if(h.length===3)h=h.split('').map(x=>x+x).j
 /* ---------- 卡片拖拽排序 ---------- */
 let dragEl=null;
 function startDrag(e,id){
-  if(e.button!==0) return; const card=e.target.closest('.card'); if(!card)return;
+  if(e.button!==0) return;
+  if(e.target.closest('button,input,select,textarea,a')) return; // 交互控件不触发拖拽
+  const card=e.target.closest('.card'); if(!card)return;
   const rect=card.getBoundingClientRect(); const ox=e.clientX-rect.left, oy=e.clientY-rect.top;
   const ghost=card.cloneNode(true); ghost.style.cssText='position:fixed;z-index:99;width:'+rect.width+'px;opacity:.6;pointer-events:none;margin:0';
   document.body.appendChild(ghost); card.classList.add('dragging'); dragEl={id,card,ghost,ox,oy};
@@ -1350,16 +1352,32 @@ function addCard(kind, dsId, col, opts={}){
   state.board.push(card); state.selCard=card.id; state.selDs=null;
   render();
 }
-function duplicateOverlay(c){
-  // 叠加同名列的另一个数据集（跨工作区对比）
-  const others=DATASETS.filter(d=>d.id!==c.dsId && colsOf(d).includes(c.col));
-  if(!others.length){ toast(t('no_peer_col')+' '+c.col); return; }
-  const ds=others[0];
-  const overlay = (c.opts.overlay||[]).slice();
-  overlay.push({dsId:ds.id, col:c.col, label:ds.file+' / '+c.col});
-  c.opts.overlay=overlay;
-  toast(t('toast_overlay')+' '+ds.file+'（'+wsOf(ds).name+'）');
+function duplicateCard(c){
+  if(!c) return;
+  // 复制一份图表（含其叠加设置）；若其他数据集有同名列，顺带叠加做跨工作区对比
+  const copy={ id:'c'+(state.cardSeq++), kind:c.kind, dsId:c.dsId, col:c.col,
+    opts:JSON.parse(JSON.stringify(c.opts||{})), title:c.title, order:0 };
+  const peer=DATASETS.find(d=>d.id!==c.dsId && colsOf(d).includes(c.col));
+  if(peer) copy.opts.overlay=(copy.opts.overlay||[]).concat([{dsId:peer.id, col:c.col, label:peer.file+' / '+c.col}]);
+  const idx=state.board.findIndex(x=>x.id===c.id);
+  if(idx>=0) state.board.splice(idx+1,0,copy); else state.board.push(copy);
+  state.selCard=copy.id; state.selDs=null;
   render();
+  if(peer) toast(t('toast_overlay')+' '+peer.file+'（'+wsOf(peer).name+'）');
+  else toast(t('toast_dup'));
+}
+function deleteCard(id){
+  const idx=state.board.findIndex(x=>x.id===id);
+  if(idx<0) return;
+  state.board.splice(idx,1); // 原地删除，保证与当前看板 cards 是同一数组
+  if(state.selCard===id) state.selCard=null;
+  render();
+}
+function sizeBytes(s){
+  if(!s) return 0;
+  const m=String(s).match(/([\d.]+)\s*(B|KB|MB|GB)/i); if(!m) return 0;
+  const n=parseFloat(m[1]); const u=m[2].toUpperCase();
+  return u==='GB'? n*1024*1024*1024 : u==='MB'? n*1024*1024 : u==='KB'? n*1024 : n;
 }
 async function openPicker(){
   const body=$('#m-body'); $('#m-title').textContent=t('add_chart');
@@ -1367,24 +1385,43 @@ async function openPicker(){
   for(const ws of WORKSPACES){
     const dss=DATASETS.filter(d=>d.ws===ws.id);
     if(!dss.length)continue;
-    h+=`<div class="pick-ds"><div class="pd-head"><span class="dot" style="width:8px;height:8px;border-radius:50%;background:${ws.color}"></span><b>${ws.name}</b></div><div class="pd-cols">`;
-    for(const d of dss){
-      const profs = await profileAll(d.id);
-      h+=`<div style="font-size:11px;color:var(--text3);margin:4px 0 2px">${d.file} / ${d.rows==='?'?d.size:(fmt(d.rows)+t('rows'))}</div>`;
-      for(const cn of colsOf(d)){
-        const p=profs[cn]||{type:'category'};
-        const acts = p.type==='category'? [['bar',t('bar')],['missing',t('missing')]] : [['hist',t('histogram')],['box',t('box')],['violin',t('violin')],['scatter',t('scatter')],['line',t('line')],['ecdf',t('ecdf')]];
-        h+=`<div class="pick-col"><span class="pn">${cn}</span><span class="pt">${p.type}</span>
-          ${acts.map(([k,l])=>`<button class="chip" data-pick="${k}" data-ds="${d.id}" data-col="${cn}">${l}</button>`).join('')}
-          <button class="chip" data-pick="corr" data-ds="${d.id}" data-col="${cn}">${t('corr')}</button></div>`;
-      }
-    }
-    h+=`</div></div>`;
+    h+=`<div class="pick-ds" data-ws="${escapeAttr(ws.id)}"><div class="pd-head"><span class="dot" style="width:8px;height:8px;border-radius:50%;background:${ws.color}"></span><b>${escapeHtml(ws.name)}</b></div><div class="pd-cols"></div></div>`;
   }
   body.innerHTML=h;
-  $$('.pd-head',body).forEach(hd=>hd.onclick=()=>hd.parentElement.classList.toggle('open'));
-  $$('[data-pick]',body).forEach(b=>b.onclick=()=>{ addCard(b.dataset.pick, b.dataset.ds, b.dataset.col); closeModal(); });
+  $$('.pick-ds',body).forEach(grp=>{
+    grp.querySelector('.pd-head').onclick=async()=>{
+      grp.classList.toggle('open');
+      if(grp.classList.contains('open') && !grp.dataset.loaded){ grp.dataset.loaded='1'; await fillPickerGroup(grp, grp.dataset.ws); }
+    };
+  });
   $('#modal').classList.add('show');
+}
+async function fillPickerGroup(grp, wsId){
+  const box=grp.querySelector('.pd-cols');
+  box.innerHTML='<div style="font-size:11px;color:var(--text3);padding:6px 0">'+t('loading')+'</div>';
+  let h='';
+  for(const d of DATASETS.filter(x=>x.ws===wsId)){
+    let cols=colsOf(d);
+    if(!cols.length && LIVE){
+      if(sizeBytes(d.size)>150*1024*1024){
+        h+=`<div style="font-size:11px;color:var(--text3);margin:4px 0 2px">${escapeHtml(d.file)} / ${d.size}</div><div style="font-size:11px;color:var(--warn);padding:0 0 6px">${t('too_big_auto')}</div>`;
+        continue;
+      }
+      try{ await ensureOpen(d.id); }catch(err){ h+=`<div style="font-size:11px;color:var(--danger);padding:0 0 6px">${escapeHtml(d.file)}：${escapeHtml(err.message||'')}</div>`; continue; }
+      cols=colsOf(d);
+    }
+    const profs = await profileAll(d.id);
+    h+=`<div style="font-size:11px;color:var(--text3);margin:4px 0 2px">${escapeHtml(d.file)} / ${d.rows==='?'?d.size:(fmt(d.rows)+t('rows'))}</div>`;
+    for(const cn of cols){
+      const p=profs[cn]||{type:'category'};
+      const acts = p.type==='category'? [['bar',t('bar')],['missing',t('missing')]] : [['hist',t('histogram')],['box',t('box')],['violin',t('violin')],['scatter',t('scatter')],['line',t('line')],['ecdf',t('ecdf')]];
+      h+=`<div class="pick-col"><span class="pn">${escapeHtml(cn)}</span><span class="pt">${escapeHtml(p.type)}</span>
+        ${acts.map(([k,l])=>`<button class="chip" data-pick="${k}" data-ds="${escapeAttr(d.id)}" data-col="${escapeAttr(cn)}">${l}</button>`).join('')}
+        <button class="chip" data-pick="corr" data-ds="${escapeAttr(d.id)}" data-col="${escapeAttr(cn)}">${t('corr')}</button></div>`;
+    }
+  }
+  box.innerHTML=h||'<div style="font-size:11px;color:var(--text3);padding:6px">—</div>';
+  $$('[data-pick]',box).forEach(b=>b.onclick=()=>{ addCard(b.dataset.pick, b.dataset.ds, b.dataset.col); closeModal(); });
 }
 function closeModal(){ $('#modal').classList.remove('show'); }
 
@@ -1621,7 +1658,8 @@ $('#mv-fold').addEventListener('change',()=>{ if(!LIVE && state.modelMode){ cons
 
 /* ---------- 导出 ---------- */
 function exportCardPng(c){
-  const cardEl=$(`.card[data-card="${c.id}"] canvas`); if(!cardEl)return;
+  if(!c) return;
+  const cardEl=$(`.card[data-card="${c.id}"] canvas`); if(!cardEl||!cardEl.width) return;
   const a=document.createElement('a'); a.download=(c.title||'chart').replace(/[\\/:*?"<>|]/g,'_')+'.png';
   a.href=cardEl.toDataURL('image/png'); a.click(); toast(t('toast_png'));
 }
