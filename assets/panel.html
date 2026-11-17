@@ -75,8 +75,8 @@ select:focus,input:focus{border-color:var(--accent); box-shadow:0 0 0 1px var(--
 .g-head .caret svg{display:block; transition:transform .15s}
 .g-head.open .caret svg{transform:rotate(90deg)}
 .g-head .dot{width:8px;height:8px;border-radius:50%;flex:0 0 8px}
-.g-head .g-name{font-weight:600; flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
-.g-head .g-path{font-size:10px; color:var(--text3); font-family:ui-monospace,Consolas,monospace}
+.g-head .g-name{font-weight:600; flex:0 0 auto; max-width:60%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.g-head .g-path{font-size:10px; color:var(--text3); font-family:ui-monospace,Consolas,monospace; flex:1 1 0; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-align:right}
 .g-body{display:none; padding-left:16px}
 .tree-group.open>.g-body{display:block}
 .tree-item{display:flex; align-items:center; gap:6px; padding:3px 8px; border-radius:6px; cursor:pointer; color:var(--text2); user-select:none; position:relative}
@@ -265,7 +265,7 @@ svg.graph .node.desc rect{stroke:var(--ok)}
 <body>
 
 <header id="topbar">
-  <div class="brand"><span class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg></span>DataPilot <span class="proto-tag" id="mode-badge">原型 / 模拟数据</span></div>
+  <div class="brand"><span class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg></span>DataPilot <span class="proto-tag" id="mode-badge" data-i18n="mock_mode">原型 / 模拟数据</span></div>
   <select id="ws-filter"><option value="">全部工作区</option></select>
   <button class="btn" id="btn-add-root" data-i18n="root_dir"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/></svg>根目录</button>
   <button class="btn" id="btn-upload" data-i18n="upload" data-i18n-title="upload_title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>上传</button>
@@ -279,7 +279,7 @@ svg.graph .node.desc rect{stroke:var(--ok)}
   <button class="btn" id="btn-md"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/><path d="M14 2v5h5"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>Markdown</button>
   <button class="btn" id="btn-report" data-i18n="report" data-i18n-title="report_title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 16v-5"/><path d="M12 16V8"/><path d="M17 16v-3"/></svg>报告</button>
   <button class="btn" id="btn-train" data-i18n="train" data-i18n-title="train_title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>训练</button>
-  <button class="btn" id="btn-theme" title="切换亮暗主题"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button>
+  <button class="btn" id="btn-theme" title="切换亮暗主题" data-i18n-title="theme_toggle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button>
   <button class="btn" id="btn-lang">EN</button>
   <button class="btn icon" id="btn-settings" data-i18n-title="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg></button>
 </header>
@@ -337,7 +337,7 @@ svg.graph .node.desc rect{stroke:var(--ok)}
 </div>
 
 <div id="modal"><div class="m-box">
-  <div class="m-head"><h3 id="m-title" data-i18n="add_chart"></h3><button class="btn icon" id="m-close" title="关闭"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button></div>
+  <div class="m-head"><h3 id="m-title" data-i18n="add_chart"></h3><button class="btn icon" id="m-close" title="关闭" data-i18n-title="close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button></div>
   <div class="m-body" id="m-body"></div>
   <div class="m-foot"><button class="btn" id="m-cancel" data-i18n="cancel"></button></div>
 </div></div>
@@ -345,13 +345,13 @@ svg.graph .node.desc rect{stroke:var(--ok)}
 <div id="toast"></div>
 
 <div id="report-modal"><div class="m-box">
-  <div class="m-head"><h3 id="report-title" data-i18n="report_heading"></h3><button class="btn icon" id="report-close" title="关闭"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button></div>
+  <div class="m-head"><h3 id="report-title" data-i18n="report_heading"></h3><button class="btn icon" id="report-close" title="关闭" data-i18n-title="close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button></div>
   <div class="m-body" id="report-body"></div>
   <div class="m-foot"><button class="btn" id="report-copy" data-i18n="copy_md"></button><button class="btn primary" id="report-download" data-i18n="download_md"></button></div>
 </div></div>
 
 <div id="train-modal"><div class="m-box">
-  <div class="m-head"><h3 id="train-title" data-i18n="train_heading"></h3><button class="btn icon" id="train-close" title="关闭"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button></div>
+  <div class="m-head"><h3 id="train-title" data-i18n="train_heading"></h3><button class="btn icon" id="train-close" title="关闭" data-i18n-title="close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button></div>
   <div class="m-body">
     <div id="train-form">
       <div><label data-i18n="tr_dataset"></label><select id="tf-dataset"></select></div>
@@ -504,10 +504,40 @@ let modeBadge = 'mock';
 
 function humanSize(b){ if(b==null||b==='')return ''; if(b>=1e9)return (b/1e9).toFixed(1)+' GB'; if(b>=1e6)return (b/1e6).toFixed(1)+' MB'; if(b>=1e3)return (b/1e3).toFixed(1)+' KB'; return b+' B'; }
 
+/* 后端错误/原因文本是中文；英文模式下按已知模式翻译，未知原样返回 */
+const ERR_EN=[
+  [/^不是有效的 zip\/xlsx（找不到 EOCD）$/,'Not a valid zip/xlsx (EOCD not found)'],
+  [/^zip 本地头损坏:\s*(.*)$/,'Corrupt zip local header: $1'],
+  [/^zip 压缩方法 (\d+) 不受支持（仅 stored\/deflate）$/,'Unsupported zip compression method $1 (only stored/deflate)'],
+  [/^这是旧版 \.xls（BIFF\/OLE）文件，暂不支持，请用 Excel 另存为 \.xlsx$/,'Legacy .xls (BIFF/OLE) is not supported — save it as .xlsx in Excel'],
+  [/^不是有效的 xlsx（缺少 xl\/workbook\.xml）$/,'Not a valid xlsx (missing xl/workbook.xml)'],
+  [/^(xlsx|xls) 中没有可读取的工作表$/,'No readable worksheet in $1'],
+  [/^缺少 \.xls 解析依赖（xlsx 包未安装），请先安装$/,'Missing .xls parser (xlsx package not installed)'],
+  [/^xls 解析失败：(.*)$/,'xls parse failed: $1'],
+  [/^JSON 解析失败：(.*)$/,'JSON parse failed: $1'],
+  [/^缺少 hyparquet 依赖.*$/,'Missing hyparquet dependency: run npm install hyparquet hyparquet-compressors'],
+  [/^protobuf varint 越界$/,'protobuf varint out of range'],
+  [/^ONNX 文件中没有 graph 字段$/,'ONNX file has no graph field'],
+  [/^不是有效的 \.onnx 文件[：:]?\s*(.*)$/,'Not a valid .onnx file: $1'],
+  [/^文件不存在[：:]?\s*(.*)$/,'File not found: $1'],
+  [/^没有权限读取[：:]?\s*(.*)$/,'Permission denied: $1'],
+];
+function trError(msg){
+  const s=String(msg||''); let m;
+  if((m=s.match(/^不支持的文件类型[：:]\s*(.*)$/))) return t('unsupported_format')+': '+m[1];
+  if((m=s.match(/^文件超过\s*(.+?)\s*上限$/))) return tf('too_large_file',{size:m[1]});
+  if((m=s.match(/^不支持的 task\/model[：:]\s*(.*)$/))) return t('bad_task_model')+': '+m[1];
+  if((m=s.match(/^ONNX 解析失败[：:]\s*(.*)$/))) return t('onnx_failed')+': '+trError(m[1]);
+  if(state.lang==='en'){
+    for(const [re,rep] of ERR_EN){ if(re.test(s)) return s.replace(re,rep); }
+  }
+  return s;
+}
+
 async function api(path, opts={}){
   const r = await fetch(API_BASE + path, opts);
   const j = await r.json().catch(()=>({ok:false, error:{code:'HTTP', message:'non-json'}}));
-  if(!r.ok || j.ok === false) throw new Error((j.error && j.error.message) || ('HTTP '+r.status));
+  if(!r.ok || j.ok === false) throw new Error(trError((j.error && j.error.message) || ('HTTP '+r.status)));
   return j;
 }
 
@@ -615,7 +645,7 @@ async function initLive(){
     const st = await api('/state');
     const WS_COLORS = ['#4f8cff','#ff9f43','#2dd4a7','#a78bfa','#38bdf8'];
     LIVE = { roots: st.roots||[], openCache:{}, schema:{}, profiles:{} };
-    WORKSPACES = LIVE.roots.map((r,i)=>({ id:r.id, name:r.label||r.path, path:r.path, color:WS_COLORS[i%WS_COLORS.length], custom:false }));
+    WORKSPACES = LIVE.roots.map((r,i)=>({ id:r.id, name:r.id==='uploads' ? t('upload_root') : (r.label||r.path), raw:r.label, path:r.path, color:WS_COLORS[i%WS_COLORS.length], custom:false }));
     DATASETS = []; MODELS = []; DS_COLS = {}; schemaMap = {};
     for(const r of LIVE.roots){
       try {
@@ -749,7 +779,7 @@ const I18N = {
     no_numeric:'该列没有可绘制的数值', no_data:'该列没有数据', bar_need_cat:'条形图需要类别列',
     no_corr:'无可用的数值列进行相关分析', no_columns:'没有列可显示', index:'索引',
     picker_hint:'选择数据集 → 展开列 → 点图表类型', md_source:'数据源', md_stat:'统计', md_missing:'缺失',
-    live_mode:'实时 / {n} 工作区', mock_mode:'原型 / 模拟数据', all_workspaces:'全部工作区', workspaces:'工作区',
+    live_mode:'实时 / {n} 工作区', mock_mode:'原型 / 模拟数据', all_workspaces:'全部工作区', workspaces:'工作区', doc_title:'DataPilot 数据工作台', cols_n:'{n} 列', upload_root:'上传数据', onnx_failed:'ONNX 解析失败', unsupported_format:'不支持的文件类型', too_large_file:'文件超过 {size} 上限', bad_task_model:'不支持的任务/模型',
     train:'训练', train_title:'训练机器学习模型', train_heading:'模型训练',
     tr_dataset:'数据集', tr_task:'任务', tr_model:'模型', tr_target:'目标列', tr_features:'特征列', tr_params:'参数',
     tr_test_split:'测试集比例', tr_seed:'随机种子', tr_run:'开始训练',
@@ -806,7 +836,7 @@ const I18N = {
     no_numeric:'No plottable numeric values in this column', no_data:'No data in this column', bar_need_cat:'Bar chart needs a categorical column',
     no_corr:'No numeric columns available for correlation', no_columns:'No columns to display', index:'index',
     picker_hint:'Select a dataset → expand a column → click a chart type', md_source:'Source', md_stat:'Stats', md_missing:'Missing',
-    live_mode:'Live / {n} workspace(s)', mock_mode:'Prototype / mock data', all_workspaces:'All workspaces', workspaces:'Workspaces',
+    live_mode:'Live / {n} workspace(s)', mock_mode:'Prototype / mock data', all_workspaces:'All workspaces', workspaces:'Workspaces', doc_title:'DataPilot Workbench', cols_n:'{n} cols', upload_root:'Uploads', onnx_failed:'ONNX parse failed', unsupported_format:'Unsupported file type', too_large_file:'File exceeds the {size} limit', bad_task_model:'Unsupported task/model',
     train:'Train', train_title:'Train ML models', train_heading:'Model training',
     tr_dataset:'Dataset', tr_task:'Task', tr_model:'Model', tr_target:'Target column', tr_features:'Feature columns', tr_params:'Parameters',
     tr_test_split:'Test split', tr_seed:'Random seed', tr_run:'Train',
@@ -829,6 +859,7 @@ const t = k => (I18N[state.lang][k] ?? I18N.zh[k] ?? k);
 function tf(k, vars){ let s = t(k); if(vars) for (const [key,val] of Object.entries(vars)) s = s.replace(new RegExp('\\{'+key+'\\}','g'), String(val)); return s; }
 function applyStaticLang(){
   document.documentElement.lang = state.lang;
+  document.title = t('doc_title');
   document.querySelectorAll('[data-i18n]').forEach(el=>{
     const k = el.getAttribute('data-i18n');
     if(el.children.length){
@@ -840,7 +871,22 @@ function applyStaticLang(){
   });
   document.querySelectorAll('[data-i18n-title]').forEach(el=>el.title = t(el.getAttribute('data-i18n-title')));
   document.querySelectorAll('[data-i18n-ph]').forEach(el=>el.placeholder = t(el.getAttribute('data-i18n-ph')));
+  $$('#cols-select option').forEach(o=>{ if(o.value) o.textContent = tf('cols_n',{n:o.value}); });
   $('#btn-lang').textContent = state.lang==='zh' ? 'EN' : '中';
+  retranslateTitles();
+}
+/* 自动生成的标题（卡片/看板）跟随语言切换；用户手动改名后不再自动改 */
+function cardTitleOf(kind, col){
+  const kinds={hist:t('histogram'),box:t('box'),violin:t('violin'),ecdf:t('ecdf'),bar:t('bar'),line:t('line'),scatter:t('scatter'),corr:t('corr'),missing:t('missing')};
+  return `${kinds[kind]||kind} / ${col}`;
+}
+function retranslateTitles(){
+  WORKSPACES.forEach(ws=>{ if(ws.id==='uploads') ws.name=t('upload_root'); });
+  state.boards.forEach((b,i)=>{
+    if(b.auto) b.title = (i===0) ? t('board_default') : tf('board_new',{n:i+1});
+    (b.cards||[]).forEach(c=>{ if(c.auto) c.title = cardTitleOf(c.kind, c.col); });
+  });
+  const cb=curBoard(); if(cb) state.title=cb.title;
 }
 
 /* ---- 图标系统：手绘 SVG，统一描边/圆角/粗细（Lucide 风格，ISC 许可） ---- */
@@ -874,7 +920,7 @@ function renderTree(){
     for(const d of dss){
       if(f && !d.file.toLowerCase().includes(f)) continue;
       html += `<div class="tree-item ${state.selDs===d.id?'sel':''}" data-ds="${d.id}">
-        <span class="ico">${svgIcon('file',14)}</span><span class="fname">${d.file}</span><span class="meta">${d.rows==='?'?d.size:(fmt(d.rows)+t('rows'))}</span></div>`;
+        <span class="ico">${svgIcon('file',14)}</span><span class="fname">${d.file}</span><span class="meta">${d.rows==='?'?d.size:rowsText(d.rows)}</span></div>`;
     }
     for(const m of models){
       if(f && !m.file.toLowerCase().includes(f)) continue;
@@ -906,7 +952,7 @@ async function renderDsInspector(el){
     <div class="kv"><span class="k">${t('location')}</span><span class="v">${ws.name}</span></div>
     <div class="kv"><span class="k">${t('size')}</span><span class="v">${ds.rows==='?'?ds.size:(fmt(ds.rows)+' × '+ds.cols+' '+t('col'))}</span></div>
     <div class="kv"><span class="k">${t('format')}</span><span class="v">${ds.type} / ${ds.size}</span></div>
-    ${(ds.sheets&&ds.sheets.length>1)?`<div class="kv"><span class="k">${t('sheet')}</span><span class="v"><select id="ds-sheet" style="max-width:160px">${ds.sheets.map(s=>`<option value="${escapeAttr(s.name)}" ${s.name===ds.sheetName?'selected':''}>${s.name} (${s.rowCount} ${t('rows')})</option>`).join('')}</select></span></div>`:''}
+    ${(ds.sheets&&ds.sheets.length>1)?`<div class="kv"><span class="k">${t('sheet')}</span><span class="v"><select id="ds-sheet" style="max-width:160px">${ds.sheets.map(s=>`<option value="${escapeAttr(s.name)}" ${s.name===ds.sheetName?'selected':''}>${s.name} (${rowsText(s.rowCount)})</option>`).join('')}</select></span></div>`:''}
     <div style="margin-top:8px"><span class="badge ok">${t('readonly')}</span> <span class="badge">${t('schema_cached')}</span></div>
   </div>`;
   h+=`<div class="ins-sec"><h4>${t('col_profile_hint')}</h4>`;
@@ -936,6 +982,12 @@ function colStats(p){
   return `μ ${p.mean.toFixed(3)} σ ${p.std.toFixed(3)} / P50 ${p.qs.p50.toFixed(3)} / P99 ${p.qs.p99.toFixed(3)} / ${t('missing_k')} ${pct(p.nulls)} / ${t('outliers')} ${p.outliers.out15}`;
 }
 function pct(v){ return (v*100).toFixed(2)+'%'; }
+/* 中英标点差异：冒号/括号/逗号/句号 */
+function sep(){ return state.lang==='en' ? ': ' : '：'; }
+function paren(s){ return state.lang==='en' ? ' ('+s+')' : '（'+s+'）'; }
+function listSep(){ return state.lang==='en' ? ', ' : '，'; }
+function endP(){ return state.lang==='en' ? '.' : '。'; }
+function rowsText(n){ return fmt(n)+(state.lang==='en' ? ' rows' : '行'); }
 function colActions(dsId, cn, p){
   const acts = p.type==='category'
     ? [['bar',t('bar')]]
@@ -972,7 +1024,7 @@ function renderCardInspector(el, c){
     </div>
   </div>`;
   el.innerHTML=h;
-  $('#card-title').oninput=e=>{ c.title=e.target.value; renderBoard(); };
+  $('#card-title').oninput=e=>{ c.title=e.target.value; c.auto=false; renderBoard(); };
   $('#card-bins')?.addEventListener('input',e=>{ c.opts.bins=+e.target.value; drawBoard(); });
   $('#card-log')?.addEventListener('change',e=>{ c.opts.log=e.target.checked; drawBoard(); });
   $('#card-density')?.addEventListener('change',e=>{ c.opts.density=e.target.checked; drawBoard(); });
@@ -1345,10 +1397,9 @@ function startDrag(e,id){
 
 /* ---------- 添加图表 ---------- */
 function addCard(kind, dsId, col, opts={}){
-  const ds=dsById(dsId); const kinds={hist:t('histogram'),box:t('box'),violin:t('violin'),ecdf:t('ecdf'),bar:t('bar'),line:t('line'),scatter:t('scatter'),corr:t('corr'),missing:t('missing')};
   const defaults={hist:{bins:40,log:false}, scatter:{density:false}};
   const card={id:'c'+(state.cardSeq++), kind, dsId, col, opts:Object.assign({}, defaults[kind]||{}, opts),
-    title: `${kinds[kind]||kind} / ${col}`, order: state.board.length};
+    title: cardTitleOf(kind, col), auto:true, order: state.board.length};
   state.board.push(card); state.selCard=card.id; state.selDs=null;
   render();
 }
@@ -1356,14 +1407,14 @@ function duplicateCard(c){
   if(!c) return;
   // 复制一份图表（含其叠加设置）；若其他数据集有同名列，顺带叠加做跨工作区对比
   const copy={ id:'c'+(state.cardSeq++), kind:c.kind, dsId:c.dsId, col:c.col,
-    opts:JSON.parse(JSON.stringify(c.opts||{})), title:c.title, order:0 };
+    opts:JSON.parse(JSON.stringify(c.opts||{})), title:c.title, auto:!!c.auto, order:0 };
   const peer=DATASETS.find(d=>d.id!==c.dsId && colsOf(d).includes(c.col));
   if(peer) copy.opts.overlay=(copy.opts.overlay||[]).concat([{dsId:peer.id, col:c.col, label:peer.file+' / '+c.col}]);
   const idx=state.board.findIndex(x=>x.id===c.id);
   if(idx>=0) state.board.splice(idx+1,0,copy); else state.board.push(copy);
   state.selCard=copy.id; state.selDs=null;
   render();
-  if(peer) toast(t('toast_overlay')+' '+peer.file+'（'+wsOf(peer).name+'）');
+  if(peer) toast(t('toast_overlay')+' '+peer.file+paren(wsOf(peer).name));
   else toast(t('toast_dup'));
 }
 function deleteCard(id){
@@ -1407,11 +1458,11 @@ async function fillPickerGroup(grp, wsId){
         h+=`<div style="font-size:11px;color:var(--text3);margin:4px 0 2px">${escapeHtml(d.file)} / ${d.size}</div><div style="font-size:11px;color:var(--warn);padding:0 0 6px">${t('too_big_auto')}</div>`;
         continue;
       }
-      try{ await ensureOpen(d.id); }catch(err){ h+=`<div style="font-size:11px;color:var(--danger);padding:0 0 6px">${escapeHtml(d.file)}：${escapeHtml(err.message||'')}</div>`; continue; }
+      try{ await ensureOpen(d.id); }catch(err){ h+=`<div style="font-size:11px;color:var(--danger);padding:0 0 6px">${escapeHtml(d.file)}${sep()}${escapeHtml(err.message||'')}</div>`; continue; }
       cols=colsOf(d);
     }
     const profs = await profileAll(d.id);
-    h+=`<div style="font-size:11px;color:var(--text3);margin:4px 0 2px">${escapeHtml(d.file)} / ${d.rows==='?'?d.size:(fmt(d.rows)+t('rows'))}</div>`;
+    h+=`<div style="font-size:11px;color:var(--text3);margin:4px 0 2px">${escapeHtml(d.file)} / ${d.rows==='?'?d.size:rowsText(d.rows)}</div>`;
     for(const cn of cols){
       const p=profs[cn]||{type:'category'};
       const acts = p.type==='category'? [['bar',t('bar')],['missing',t('missing')]] : [['hist',t('histogram')],['box',t('box')],['violin',t('violin')],['scatter',t('scatter')],['line',t('line')],['ecdf',t('ecdf')]];
@@ -1454,7 +1505,7 @@ async function renderLiveModel(m){
       'producer': meta.model?.producer||'—',
       [t('ops')]: meta.model?.nodeCount ?? g.nodes.filter(n=>n.kind!=='weight').length,
       [t('params')]: meta.model?.params ? (meta.model.params>=1e6 ? (meta.model.params/1e6).toFixed(2)+'M' : (meta.model.params/1e3).toFixed(1)+'K') : '—',
-      [t('input')]: (meta.model?.inputs||[]).map(i=>`${i.name} [${i.shape.join('×')}]`).join('，')||'—',
+      [t('input')]: (meta.model?.inputs||[]).map(i=>`${i.name} [${i.shape.join('×')}]`).join(listSep())||'—',
       [t('output')]: (meta.model?.outputs||[]).map(i=>`${i.name} [${i.shape.join('×')}]`).join('，')||'—',
     }};
     drawGraph(info, g);
@@ -1465,13 +1516,13 @@ async function renderLiveModel(m){
     <div class="kv"><span class="k">${t('size')}</span><span class="v">${humanSize(meta.size||m.size)}</span></div>
     <div class="kv"><span class="k">${t('modified')}</span><span class="v">${meta.mtime? new Date(meta.mtime).toLocaleString() : '—'}</span></div>
     <div style="margin-top:10px;padding:10px;border:1px dashed var(--line2);border-radius:6px;color:var(--text2);font-size:12px">
-      ${t('cannot_parse')}：${meta.reason||t('unknown_format')}。</div>`;
+      ${t('cannot_parse')}${sep()}${trError(meta.reason)||t('unknown_format')}${endP()}</div>`;
   const ol=$('#op-legend'); if(ol) ol.innerHTML='<span class="badge">'+t('metadata_mode')+'</span>';
   $('#mv-fold').disabled=true;
   $('#mv-search').disabled=true;
   wrap.innerHTML=`<div style="display:grid;place-items:center;height:100%;color:var(--text3)">
     <div style="text-align:center"><div style="font-size:32px;margin-bottom:8px">${svgIcon('box',40)}</div>
-    <div>${meta.reason || t('graph_unavailable')}</div></div></div>`;
+    <div>${meta.reason ? trError(meta.reason) : t('graph_unavailable')}</div></div></div>`;
 }
 function renderGraph(){
   const m=MODELS.find(x=>x.id===state.modelMode.modelId);
@@ -1668,8 +1719,8 @@ async function exportBoardMarkdown(){
   const lines=['# '+(state.title||t('board_default')),''];
   for(const c of state.board){ const ds=dsById(c.dsId); const p=c.col? await profile(c.dsId,c.col):null;
     lines.push(`## ${c.title}`);
-    lines.push(`- ${t('md_source')}：${ds.file}（${wsOf(ds).name}，${ds.rows==='?'?ds.size:(fmt(ds.rows)+' '+t('rows'))}）`);
-    if(p && p.type!=='category' && p.mean!==undefined) lines.push(`- ${t('md_stat')}：μ ${p.mean.toFixed(3)} / σ ${p.std.toFixed(3)} / P50 ${p.qs.p50.toFixed(3)} / P99 ${p.qs.p99.toFixed(3)} / ${t('md_missing')} ${pct(p.nulls)}`);
+    lines.push(`- ${t('md_source')}${sep()}${ds.file}${paren(wsOf(ds).name+listSep()+(ds.rows==='?'?ds.size:rowsText(ds.rows)))}`);
+    if(p && p.type!=='category' && p.mean!==undefined) lines.push(`- ${t('md_stat')}${sep()}μ ${p.mean.toFixed(3)} / σ ${p.std.toFixed(3)} / P50 ${p.qs.p50.toFixed(3)} / P99 ${p.qs.p99.toFixed(3)} / ${t('md_missing')} ${pct(p.nulls)}`);
     lines.push('');
   }
   const txt=lines.join('\n');
@@ -1712,12 +1763,12 @@ function switchBoard(i){
 }
 function addBoard(){
   const id='b'+(Date.now().toString(36));
-  state.boards.push({ id, title:tf('board_new',{n:state.boards.length+1}), cards:[] });
+  state.boards.push({ id, title:tf('board_new',{n:state.boards.length+1}), cards:[], auto:true });
   switchBoard(state.boards.length-1);
 }
 function renameBoard(i){
   const b=state.boards[i]; const name=prompt(t('rename_board'), b.title||'');
-  if(name && name.trim()){ b.title=name.trim(); if(i===state.activeBoard){ state.title=b.title; render(); } else renderTabs(); }
+  if(name && name.trim()){ b.title=name.trim(); b.auto=false; if(i===state.activeBoard){ state.title=b.title; render(); } else renderTabs(); }
 }
 function closeBoard(i){
   if(state.boards.length<=1){ toast(t('keep_one_board')); return; }
@@ -1731,14 +1782,14 @@ function closeBoard(i){
 
 /* ---------- 视图保存（localStorage） ---------- */
 function saveView(){
-  const payload={ boards: state.boards.map(b=>({id:b.id,title:b.title,cards:b.cards})), active: state.activeBoard, ts:Date.now() };
+  const payload={ boards: state.boards.map(b=>({id:b.id,title:b.title,auto:!!b.auto,cards:b.cards})), active: state.activeBoard, ts:Date.now() };
   let views=JSON.parse(localStorage.getItem('dp.views')||'{}');
   const key='view_'+Object.keys(views).length;
   views[key]=payload; localStorage.setItem('dp.views',JSON.stringify(views));
   toast(tf('toast_saved',{k:key})); console.log('VIEW',key,payload);
 }
 function loadLastView(){ try{ const views=JSON.parse(localStorage.getItem('dp.views')||'{}'); const keys=Object.keys(views); if(keys.length){ const v=views[keys[keys.length-1]];
-    state.boards=(v.boards&&v.boards.length? v.boards : [{id:'b1',title:v.title||t('board_default'),cards:v.board||[]}]).map(b=>({id:b.id,title:b.title,cards:b.cards||[]}));
+    state.boards=(v.boards&&v.boards.length? v.boards : [{id:'b1',title:v.title||t('board_default'),cards:v.board||[]}]).map(b=>({id:b.id,title:b.title,auto:!!b.auto,cards:b.cards||[]}));
     state.activeBoard=Math.min(v.active||0, state.boards.length-1);
     const b=curBoard(); state.title=b.title; state.board=b.cards;
     const ids=state.boards.flatMap(x=>x.cards.map(c=>parseInt(String(c.id).slice(1))||0));
@@ -1803,7 +1854,7 @@ async function openReport(){
   $('#report-body').innerHTML='<p style="color:var(--text2)">'+tf('generating',{n:paths.length})+'</p>';
   $('#report-modal').classList.add('show');
   try{
-    const r = await api('/report', {method:'POST', headers:{'content-type':'application/json'}, body:JSON.stringify({paths})});
+    const r = await api('/report', {method:'POST', headers:{'content-type':'application/json'}, body:JSON.stringify({paths, lang: state.lang})});
     lastReportMd = r.markdown || '';
     $('#report-body').innerHTML = mdToHtml(r.markdown);
     const okN = r.datasets ? r.datasets.filter(d=>!d.error).length : 0;
@@ -1829,8 +1880,8 @@ async function uploadFiles(fileList){
       const buf = await f.arrayBuffer();
       const r = await api('/upload?name='+encodeURIComponent(f.name), {method:'POST', body:buf});
       if(r && r.ok) okN++;
-      else toast(t('upload_fail')+' '+f.name+'：'+((r&&r.error&&r.error.message)||t('unknown_error')));
-    }catch(e){ toast(t('upload_fail')+' '+f.name+'：'+e.message); }
+      else toast(t('upload_fail')+' '+f.name+sep()+trError((r&&r.error&&r.error.message)||t('unknown_error')));
+    }catch(e){ toast(t('upload_fail')+' '+f.name+sep()+trError(e.message)); }
   }
   if(okN){ toast(tf('toast_uploaded',{n:okN})); await initLive(); await render(); }
 }
@@ -2082,7 +2133,7 @@ function bind(){
   // 树
   $('#tree').addEventListener('click',e=>{
     const it=e.target.closest('[data-ds],[data-model]'); if(!it)return;
-    if(it.dataset.ds){ state.selDs=it.dataset.ds; state.selCard=null; renderInspector(); renderTree(); }
+    if(it.dataset.ds){ state.selDs=it.dataset.ds; state.selCard=null; renderInspector().then(()=>renderTree()); }
     else if(it.dataset.model){ openModel(it.dataset.model); }
   });
   $('#tree-filter').addEventListener('input',()=>renderTree());
